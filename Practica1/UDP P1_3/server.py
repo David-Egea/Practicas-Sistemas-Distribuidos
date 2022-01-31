@@ -13,21 +13,25 @@ while correcto!= True:
     except:
         print("Indique un número de puerto correcto")
 print("Se comienza a escuchar en la direccion {} y en el puerto {}".format(ip,puerto))
-socket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
-socket.bind((ip,puerto))
+comunicacion = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
+comunicacion.bind((ip,puerto))
 
 i = 1
 while True:
     #socket.listen()
     #(ip_connected,port_connected) = socket.accept()
     # Se reciben los bytes desde el cliente
-    bytes_rx = socket.recvfrom(1024)
-    message_recieve = pickle.loads(bytes_rx[0])
+    bytes_rx = comunicacion.recvfrom(1024)
+    message_recieved = pickle.loads(bytes_rx[0])
+    msg = message_recieved[1]
+    id = message_recieved[0]
 
-    print("Mensaje: {}".format(message_recieve))
+    print("Mensaje: {} desde el cliente {}".format(msg,id))
+    print("{} caracteres\n",format(len(msg)))
     print("Desde: {} y puerto {}".format(bytes_rx[1][0],bytes_rx[1][1]))
 
     #Se contesta al cliente
-    msg = "Hello Client {}".format(i)
+    msg = ["Hello Client {}".format(id),len(msg)]
     bytes_tx = pickle.dumps(msg)
-    socket.sendto(bytes_tx,bytes_rx[1])
+    comunicacion.sendto(bytes_tx,bytes_rx[1])
+    
