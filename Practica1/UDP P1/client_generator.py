@@ -11,5 +11,5 @@ for i in range(0,n+1):
     # Construccion del mensaje de saludo
     msg = "Hello Server, I’m Client " + str(i) 
     client = Client()
-    client.send(server_ip,server_port,msg)
+    client.send_to_server(server_ip,server_port,msg)
     del client
