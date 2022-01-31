@@ -1,6 +1,6 @@
 import socket
 import pickle
-import math
+import random
 
 class Client:
 
@@ -8,7 +8,7 @@ class Client:
         # Creaccion del socket
         self.socket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
         # Se crea un identificador unico para el client
-        self.id = math.randint(0,65536)
+        self.id = random.randint(0,65536)
 
     def __del__(self) -> None:
         # Se cierra el socket
