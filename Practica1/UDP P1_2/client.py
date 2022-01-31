@@ -11,23 +11,14 @@ class Client:
         # Se cierra el socket
         self.socket.close()
 
-    def send_to_server(self, server_ip: str, msg: str="Hola soy un cliente") -> None:
+    def send_to_server(self, server_ip: str, server_port,msg: str="Hola soy un cliente") -> None:
         # Serializacion del mensaje
         bytes_tx = pickle.dumps(msg)
-        #Se pregunta al usuario por el puerto que en el quiere crear el cliente
-        ok = False
-        while ok!= True:
-            # Pregunta al usuario el puerto 
-            server_port = input("[Cliente]: Indique el puerto al desea conectarse:\n")
-            try:
-                server_port = int(input)
-                ok = True
-            except:
-                print(f"[Cliente]: El puerto {server_port} no es valido")
+        
         # Asigna la direccion del servidor
         server_address = (server_ip,server_port)
         # Se muestra la respuesta del servidor
-        print(f"[Cliente]: Mensaje enviado al servidor: {bytes_tx}")
+        print(f"[Cliente]: Mensaje enviado al servidor: {msg}")
         # Envia el mensaje al servidor
         self.socket.sendto(bytes_tx,server_address)
         # Recibe la respuesta del servidor
