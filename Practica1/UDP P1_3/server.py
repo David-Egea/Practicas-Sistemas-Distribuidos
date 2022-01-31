@@ -22,7 +22,6 @@ while True:
     #(ip_connected,port_connected) = socket.accept()
     # Se reciben los bytes desde el cliente
     bytes_rx = socket.recvfrom(1024)
-    print(bytes_rx)
     message_recieve = pickle.loads(bytes_rx[0])
 
     print("Mensaje: {}".format(message_recieve))
