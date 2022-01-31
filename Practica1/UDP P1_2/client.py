@@ -24,6 +24,6 @@ class Client:
         # Recibe la respuesta del servidor
         bytes_rx = self.socket.recvfrom(1024)
         # Deserializar
-        server_response = pickle.loads(bytes_rx)
+        server_response = pickle.loads(bytes_rx[0])
         # Se muestra la respuesta del servidor
         print(f"[Cliente]: Respuesta del servidor: {server_response}")
