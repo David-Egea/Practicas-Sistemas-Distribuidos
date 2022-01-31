@@ -8,7 +8,7 @@ class Client:
 
     def __del__(self) -> None:
         # Se cierra el socket
-        socket.close()
+        self.socket.close()
 
     def send_to_server(self, server_ip: str, server_port: int, msg: str="Hello im a client") -> None:
         # Serializacion del mensaje
