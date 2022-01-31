@@ -27,7 +27,7 @@ while True:
     id = message_recieved[0]
 
     print("Mensaje: {} desde el cliente {}".format(msg,id))
-    print("{} caracteres\n",format(len(msg)))
+    print("{} caracteres\n".format(len(msg)))
     print("Desde: {} y puerto {}".format(bytes_rx[1][0],bytes_rx[1][1]))
 
     #Se contesta al cliente
