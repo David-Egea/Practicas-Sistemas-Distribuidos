@@ -18,8 +18,8 @@ class Client:
         # Asigna la direccion del servidor
         server_address = (server_ip,server_port)
         # Envia el mensaje al servidor
-        socket.sendto(bytes_tx,server_address)
+        self.socket.sendto(bytes_tx,server_address)
         # Recibe la respuesta del servidor
-        bytes_rx = socket.recvfrom(1024)
+        bytes_rx = self.socket.recvfrom(1024)
         # Se muestra la respuesta del servidor
         print(f"[Cliente]: Respuesta del servidor: {bytes_rx}")
