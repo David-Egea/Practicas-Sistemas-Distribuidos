@@ -1,6 +1,8 @@
 import socket 
 import pickle
 
+from numpy import byte
+
 msg = "Hello"
 bytes_tx = pickle.dumps(msg)
 
@@ -9,5 +11,6 @@ socket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
 socket.sendto(bytes_tx,server_address)
 
 bytes_rx = socket.recvfrom(1024)
-print(f"RX: {bytes_rx}")
+message_recieved =pickle.loads(bytes_rx)
+print(f"RX: {message_recieved}")
 socket.close()
