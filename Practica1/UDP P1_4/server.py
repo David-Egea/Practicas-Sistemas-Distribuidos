@@ -2,8 +2,8 @@ import socket
 import pickle
 from sys import argv
 
-ip = argv[0]
-puerto = argv[1]
+ip = argv[1]
+puerto = int(argv[2])
 
 print("Se comienza a escuchar en la direccion {} y en el puerto {}".format(ip,puerto))
 comunication = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
