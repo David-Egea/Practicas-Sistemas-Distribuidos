@@ -1,7 +1,6 @@
 import socket
 import pickle
 from time import ctime
-from datetime import date
 
 class Timer:
     @staticmethod
@@ -18,7 +17,6 @@ server_socket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
 # Se fija el puerto a la direccion 
 server_socket.bind((SERVER_IP,SERVER_PORT))
 
-
 while True:
     print("[Servidor]: Esperando conexión del cliente... ")
     # Recibe los datos enviados por un cliente
@@ -33,17 +31,21 @@ while True:
         # Guarda el id del cliente
         client_id = c_payload[1]
     #Se contesta al cliente
-    if client_inst == "_get_local_time":
+    if client_inst == "get_local_time":
         time = Timer.get_local_time()
         s_payload = pickle.dumps(time)
         server_socket.sendto(s_payload,client_address)
+        print("[Servidor]: '{s_payload}'")
     elif client_inst == "EXIT":
-        # Se cierra el servidor
+        # Se le envia un mesaje estandar al cliente 
+        s_payload = pickle.dumps("Cerrando servidor...")
+        server_socket.sendto(s_payload,client_address)
+        print("[Servidor]: '{s_payload}'")
         break
     else:
         # Se le envia un mesaje estandar al cliente 
         s_payload = pickle.dumps("Hola cliente")
         server_socket.sendto(s_payload,client_address)
-        print("[Servidor]: '{client_inst}'")
-
+        print("[Servidor]: '{s_payload}'")
+# Al salir de la comunicacion cierra el servidor 
 server_socket.close()
