@@ -9,7 +9,7 @@ class Timer:
 
 """ Servidor Socket UDP """
 
-SERVER_IP = "192.168.43.214"
+SERVER_IP = "127.0.0.1"
 SERVER_PORT = 6000
 
 # Se crea el socket server
