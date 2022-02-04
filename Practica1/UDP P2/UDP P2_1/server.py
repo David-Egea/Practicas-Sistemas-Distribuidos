@@ -26,26 +26,23 @@ while True:
     c_payload = pickle.loads(data)
     # Guarda la instruccion
     client_inst = c_payload[0]
-    print("[Cliente]: '{client_inst}'")
+    print(f"[Cliente]: '{client_inst}'")
     if len(c_payload) > 1:
         # Guarda el id del cliente
         client_id = c_payload[1]
-    #Se contesta al cliente
-    if client_inst == "get_local_time":
+    #Se contesta al cliente     
+    if client_inst == "EXIT":
+        # Se le envia un mesaje estandar al cliente 
+        s_payload = "Cerrando servidor..."
+        print(f"[Servidor]: '{s_payload}'")
+        s_payload = pickle.dumps(s_payload)
+        server_socket.sendto(s_payload,client_address)
+        break
+    else:
         time = Timer.get_local_time()
         s_payload = pickle.dumps(time)
         server_socket.sendto(s_payload,client_address)
-        print("[Servidor]: '{s_payload}'")
-    elif client_inst == "EXIT":
-        # Se le envia un mesaje estandar al cliente 
-        s_payload = pickle.dumps("Cerrando servidor...")
-        server_socket.sendto(s_payload,client_address)
-        print("[Servidor]: '{s_payload}'")
-        break
-    else:
-        # Se le envia un mesaje estandar al cliente 
-        s_payload = pickle.dumps("Hola cliente")
-        server_socket.sendto(s_payload,client_address)
-        print("[Servidor]: '{s_payload}'")
+        print(f"[Servidor]: '{time}'")
+
 # Al salir de la comunicacion cierra el servidor 
 server_socket.close()

@@ -25,7 +25,7 @@ class Client:
     def send_to_server(self, server_ip: str, server_port, msg: str="Hola soy un cliente") -> None:
         """ Se conecta a la direccion y puerto indiados, y envia un mensaje al servidor. """
         # Creacion del payload on el id del cliente y el mensaje
-        client_payload = [self._id,msg]
+        client_payload = [msg,self._id]
         # Serializacion del mensaje
         bytes_tx = pickle.dumps(client_payload)
         # Asigna la direccion del servidor
@@ -34,19 +34,16 @@ class Client:
         print(f"[Cliente]:  {msg}")
         contador = 0
         while contador <10:
-            print("Se entra en el bucle")
             #try:
-            print("Se envia un mensaje")
             # Envia el mensaje al servidor9+
             self._socket.sendto(bytes_tx,server_address)
-            print("Se recibe mensaje")
             # Recibe la respuesta del servidor
             bytes_rx,recieve_addres = self._socket.recvfrom(1024)
-            print("se bloquea en el recvfrom")
             # Deserializar
-            server_payload = pickle.loads(bytes_rx[0])
+            
+            server_payload = pickle.loads(bytes_rx)
             # Se muestra la respuesta del servidor
-            print(f"[Servidor]: {server_payload[0]}")
+            print(f"[Servidor]: {server_payload}")
             break
             #except:
             print("El servidor no se encuentra disponible")
