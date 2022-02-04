@@ -34,22 +34,21 @@ class Client:
         print(f"[Cliente]:  {msg}")
         contador = 0
         while contador <10:
-            print("Se entra en el bucle")
-            #try:
-            print("Se envia un mensaje")
-            # Envia el mensaje al servidor9+
-            self._socket.sendto(bytes_tx,server_address)
-            print("Se recibe mensaje")
-            # Recibe la respuesta del servidor
-            bytes_rx,recieve_addres = self._socket.recvfrom(1024)
-            print("se bloquea en el recvfrom")
-            # Deserializar
-            server_payload = pickle.loads(bytes_rx[0])
-            # Se muestra la respuesta del servidor
-            print(f"[Servidor]: {server_payload[0]}")
-            break
-            #except:
-            print("El servidor no se encuentra disponible")
-            time.sleep(0.5)
-            contador +=1
+            try:
+                # Envia el mensaje al servidor
+                self._socket.sendto(bytes_tx,server_address)
+                # Recibe la respuesta del servidor
+                bytes_rx,recieve_addres = self._socket.recvfrom(1024)
+                # Deserializar
+                server_payload = pickle.loads(bytes_rx[0])
+                # Se muestra la respuesta del servidor
+                print(f"[Servidor]: {server_payload[0]}")
+                hora_recibida = time.strptime(server_payload)
+                diferencia = time.time()-hora_recibida
+                print("La diferencia de horas es: {}".format(diferencia))
+                break
+            except:
+                print("El servidor no se encuentra disponible")
+                time.sleep(0.5)
+                contador +=1
        
