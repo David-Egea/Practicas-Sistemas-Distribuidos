@@ -1,37 +1,46 @@
 import socket
 import pickle
-from sys import argv
+from time import ctime
+from datetime import date
 
-ip = argv[1]
-puerto = int(argv[2])
+SERVER_IP = "192.168.137.171"
+SERVER_PORT = 6000
 
-print("Se comienza a escuchar en la direccion {} y en el puerto {}".format(ip,puerto))
-comunication = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
-comunication.bind((ip,puerto))
+class Timer:
+    @ staticmethod
+    def get_local_time() -> str:
+        return ctime()
 
-i = 1
+# Se crea el socket server
+server_socket = socket.socket(family=socket.AF_INET,type=socket.SOCK_DGRAM)
+# Se fija el puerto a la direccion 
+server_socket.bind((SERVER_IP,SERVER_PORT))
+
 while True:
-    #socket.listen()
-    #(ip_connected,port_connected) = socket.accept()
-    # Se reciben los bytes desde el cliente
-    bytes_rx = comunication.recvfrom(1024)
-    message_recieved = pickle.loads(bytes_rx[0])
-    msg = message_recieved[1]
-    id = message_recieved[0]
-
-    if 'EXIT' in msg:
+    print("[Servidor]: Esperando conexión del cliente... ")
+    # Recibe los datos enviados por un cliente
+    data,client_address = server_socket.recvfrom(1024)
+    print(f"[Servidor]: Se ha conectado un cliente con IP: {SERVER_IP} y PORT: {SERVER_PORT}")
+    # mensaje descodificado
+    c_payload = pickle.loads(data)
+    # Guarda la instruccion
+    client_inst = c_payload[0]
+    print("[Servidor]: El cliente ha enviado la instrucción '{client_inst}'")
+    if len(c_payload) > 1:
+        # Guarda el id del cliente
+        client_id = c_payload[1]
+    # En caso de recibir un EXIT se cierra el servidor
+    if 'EXIT' in client_inst:
+        # Envia un mensaje de adios
         msg = ["Adios",0]
-        bytes_tx = pickle.dumps(msg)
-        comunication.sendto(bytes_tx,bytes_rx[1])
-
+        # Serializa el mensaje
+        s_payload = pickle.dumps(msg)
+        # se lo envia al cliente
+        server_socket.sendto(s_payload,client_address)
         break
-    print("Mensaje: {} desde el cliente {}".format(msg,id))
-    print("{} caracteres\n".format(len(msg)))
-    print("Desde: {} y puerto {}".format(bytes_rx[1][0],bytes_rx[1][1]))
-
     #Se contesta al cliente
-    msg = ["Hello Client {}".format(id),len(msg)]
-    bytes_tx = pickle.dumps(msg)
-    comunication.sendto(bytes_tx,bytes_rx[1])
+    time = getattr(Timer,Timer.get_local_time())
+    s_payload = pickle.dumps(time)
+    server_socket.sendto(s_payload,client_address)
 
-comunication.close()
+server_socket.close()
