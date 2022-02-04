@@ -1,6 +1,7 @@
 import pickle
 import random
 import socket
+import time
 
 class Client:
     """ Clase clientes socket en conexiones UDP. En caso de crearse un cliente usando el CMD, se deben facilitar los siguientes argumentos por linea de comandos. 
@@ -30,11 +31,19 @@ class Client:
         server_address = (server_ip,server_port)
         # Se muestra la respuesta del servidor
         print(f"[Cliente]:  {msg}")
-        # Envia el mensaje al servidor
-        self._socket.sendto(bytes_tx,server_address)
-        # Recibe la respuesta del servidor
-        bytes_rx = self._socket.recvfrom(1024)
-        # Deserializar
-        server_payload = pickle.loads(bytes_rx[0])
-        # Se muestra la respuesta del servidor
-        print(f"[Servidor]: {server_payload[0]}")
+        contador = 0
+        while contador <10:
+            try:
+                # Envia el mensaje al servidor
+                self._socket.sendto(bytes_tx,server_address)
+                # Recibe la respuesta del servidor
+                bytes_rx = self._socket.recvfrom(1024)
+                # Deserializar
+                server_payload = pickle.loads(bytes_rx[0])
+                # Se muestra la respuesta del servidor
+                print(f"[Servidor]: {server_payload[0]}")
+            except:
+                print("El servidor no se encuentra disponible")
+                time.sleep(0.5)
+                contador +=1
+       
