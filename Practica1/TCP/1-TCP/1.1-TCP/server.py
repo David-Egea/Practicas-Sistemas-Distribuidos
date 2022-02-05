@@ -22,6 +22,6 @@ while True:
         break
     else:
         # Envia un saludo a los clientes conectados
-        connection.sendall("[Server]: Hi TCP Client".encode())
+        connection.sendall("Hi TCP Client".encode())
         connection.close()
 server_socket.close()

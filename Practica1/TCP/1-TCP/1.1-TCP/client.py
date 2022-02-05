@@ -14,6 +14,7 @@ class Client:
 
     def send_msg_to_server(self, msg: str = "Hi TCP Server") -> None:
         """ Envia el mensaje indicado al servidor"""
+        print(f"[Client]: {msg}")
         self.socket_client.sendall(msg.encode())
         data = self.socket_client.recv(1024).decode()
-        print(f"[Client]: {data}")
+        print(f"[Server]: {data}")
