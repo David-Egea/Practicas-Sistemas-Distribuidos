@@ -11,14 +11,15 @@ server_port = int(server_port)
 client_id = int(client_id)
 tiempo_inicial = time.time()
 
-for i in range(1,1000):
+for i in range(0,1000000):
     # Construccion del mensaje de saludo
     msg = "Hola, soy el cliente {}".format(client_id)
     client = Client()
     client.send_to_server(server_ip,server_port,msg)
     del client
 tiempo_final = time.time()
-print()
+diferencia = tiempo_final-tiempo_inicial
+print("El tiempo total de ejecución es de {}".format(diferencia))
 # Cliente para cerrar el servidor
 client = Client()
 exit_msg = "EXIT"

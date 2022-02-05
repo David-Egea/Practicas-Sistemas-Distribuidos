@@ -40,15 +40,15 @@ class Client:
                 # Recibe la respuesta del servidor
                 bytes_rx,recieve_addres = self._socket.recvfrom(1024)
                 # Deserializar
-                server_payload = pickle.loads(bytes_rx[0])
+                server_payload = pickle.loads(bytes_rx)
                 # Se muestra la respuesta del servidor
-                print(f"[Servidor]: {server_payload[0]}")
-                hora_recibida = time.strptime(server_payload)
-                diferencia = time.time()-hora_recibida
-                print("La diferencia de horas es: {}".format(diferencia))
+                print(f"[Servidor]: {server_payload}")
                 break
             except:
                 print("El servidor no se encuentra disponible")
                 time.sleep(0.5)
                 contador +=1
+        hora_recibida = server_payload
+        diferencia = time.time()-hora_recibida
+        print("La diferencia de horas es: {}".format(diferencia))
        
