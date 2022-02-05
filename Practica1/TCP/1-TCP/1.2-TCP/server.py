@@ -31,6 +31,8 @@ while True:
         break
     else:
         # Envia un saludo a los clientes conectados
-        connection.sendall("Hi TCP Client".encode())
+        msg = "Hi TCP Client, This is a long message that you will received in chunks of 20 bytes."
+        print(f"[Server]: {msg}\n")
+        connection.sendall(msg.encode())
         connection.close()
 server_socket.close()
