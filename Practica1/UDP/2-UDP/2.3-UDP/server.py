@@ -1,11 +1,5 @@
 import socket
 import pickle
-from time import ctime
-
-class Timer:
-    @staticmethod
-    def get_local_time() -> str:
-        return ctime()
 
 """ Servidor Socket UDP """
 

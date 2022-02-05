@@ -2,7 +2,6 @@ import pickle
 import random
 import socket
 import time
-import datetime
 
 class Client:
     """ Clase clientes socket en conexiones UDP. En caso de crearse un cliente usando el CMD, se deben facilitar los siguientes argumentos por linea de comandos. 
