@@ -10,7 +10,7 @@ class Client:
     def __init__(self) -> None:
         # Client id
         self._id = random.randint(0,65535)
-
+        print(self._id)
         # Multicast 
         self._MCAST_GRP = '224.1.1.1'
         self._MCAST_PORT = 5007
@@ -23,7 +23,6 @@ class Client:
         self.sock.bind(('',self._MCAST_PORT))
         self.hilo = threading.Thread(target = self.recieve_msg, args=(self.sock,))
         self.hilo.start()
-        self.hilo.join()
         
     def join_group(self, msg: str = "Hola!"):
         # Client message
@@ -42,16 +41,16 @@ class Client:
 
     def recieve_msg(self,s):
         cerrar = False
+        
         while cerrar == False:
             # Recieves the message
-            print(s)
             payload  = s.recv(1024)
             mensaje_recibido = pickle.loads(payload)
+            print(str(self._id)+" "+mensaje_recibido)
             if "Adios" in mensaje_recibido:
                 s.close()
                 cerrar = True
                 return "Se ha cerrado la comunicación"
-            return mensaje_recibido
         
     def send_msg(self, msg: str = "Hola!"):
         # Client message
