@@ -15,18 +15,18 @@ del client_a
 # Creacion de un nuevo cliente
 client_b = Client()
 client_c = Client()
-client_b.send_instr_to_server(instr="get nada") # El archivo no existe
-client_b.send_instr_to_server(instr="put nada Algo") # No va a estar permitido para el cliente B
-client_b.send_instr_to_server(instr="lock nada") # Bloquea para cliente B
-client_b.send_instr_to_server(instr="put nada Algo") # Cliente B si tiene permitido guardar
-client_b.send_instr_to_server(instr="unlock nada") # Desbloquea el archivo
-client_b.send_instr_to_server(instr="get nada") # Se comprueban los cambios guardados por el cliente B
+client_b.send_instr_to_server(instr="get nada.txt") # El archivo no existe
+client_b.send_instr_to_server(instr="put nada.txt Algo") # No va a estar permitido para el cliente B
+client_b.send_instr_to_server(instr="lock nada.txt") # Bloquea para cliente B
+client_b.send_instr_to_server(instr="put nada.txt Algo") # Cliente B si tiene permitido guardar
+client_b.send_instr_to_server(instr="unlock nada.txt") # Desbloquea el archivo
+client_b.send_instr_to_server(instr="get nada.txt") # Se comprueban los cambios guardados por el cliente B
 client_b.send_instr_to_server(instr="bye") # Cliente B se despide
 del client_b
-client_c.send_instr_to_server(instr="lock nada") # Bloquea para cliente C
-client_c.send_instr_to_server(instr="put nada Nada_de_nada") # Cliente C ahora tiene permitido guardar
-client_c.send_instr_to_server(instr="unlock nada") # Desbloquea el archivo
-client_c.send_instr_to_server(instr="get nada") # Se comprueban los cambios guardados por el cliente C
+client_c.send_instr_to_server(instr="lock nada.txt") # Bloquea para cliente C
+client_c.send_instr_to_server(instr="put nada.txt Nada_de_nada") # Cliente C ahora tiene permitido guardar
+client_c.send_instr_to_server(instr="unlock nada.txt") # Desbloquea el archivo
+client_c.send_instr_to_server(instr="get nada.txt") # Se comprueban los cambios guardados por el cliente C
 client_c.send_instr_to_server(instr="bye") # Cliente C se despide
 del client_c
 # Se crean un cliente para cerrar el servidor

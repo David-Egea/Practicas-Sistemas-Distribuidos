@@ -1,10 +1,10 @@
 import socket
 import pickle
-
+import os
+import sys
 # Se define el tamaño de MTU
 MTU = 1024 # En bytes 
-
-ficheros = {"readme.txt": "Leeme.", "hola.txt": "hey!"}
+path = sys.path[0]
 locks = {}
 
 # Se crea el socket del servidor
@@ -35,15 +35,14 @@ while server_on:
             # Instruccion get, devuelve un archivo al cliente
             c_file_name = c_payload[1]
             print(f"[Client]: Get {c_file_name}")
-            # Se busca el fichero
+            tx_bytes = []
             try:
-                file_data = ficheros[c_file_name]
-                print(f"[Server]: File {c_file_name} found.")
-                payload = f"'{c_file_name}': {file_data}"
+                fichero_leido = open(path+"\\files\\"+c_file_name)
+                print(fichero_leido)
                 # se ha enocntrado el fichero
-                tx_bytes = pickle.dumps(payload)
-            except KeyError:
-                # no se ha encontrado el fichero
+                tx_bytes = pickle.dumps(fichero_leido.read())
+            except :
+                # no se ha encontrado el ficher
                 error = f"Error 404 File '{c_file_name}' not found."
                 print(f"[Server]: {error}")
                 tx_bytes = pickle.dumps(error)
@@ -59,7 +58,8 @@ while server_on:
                 authorized = client_address == locks[c_file_name]
                 if authorized:
                     # Guarda la entrada
-                    ficheros[c_file_name] = c_file_data
+                    fichero = open(f"{path}\\files\\{c_file_name}",'w')
+                    fichero.write(c_file_data)
                     payload = f"File '{c_file_name}' saved."
                     print(f"[Server]: {payload}")
                 else:
