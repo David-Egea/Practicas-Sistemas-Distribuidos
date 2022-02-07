@@ -1,10 +1,12 @@
 import socket
 import pickle
+import os
+import sys
 
 # Se define el tamaño de MTU
 MTU = 1024 # En bytes 
-
-ficheros = {"readme.txt": "Leeme.", "hola.txt": "hey!"}
+path = sys.path[0]
+ficheros = os.listdir(path+"\\files")
 
 # Se crea el socket del servidor
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -35,17 +37,18 @@ while server_on:
             c_file_name = c_payload[1]
             print(f"[Client]: Get {c_file_name}")
             # Se busca el fichero
-            try:
-                file_data = ficheros[c_file_name]
-                print(f"[Server]: File {c_file_name} found.")
-                payload = f"'{c_file_name}': {file_data}"
-                # se ha enocntrado el fichero
-                tx_bytes = pickle.dumps(payload)
-            except KeyError:
-                # no se ha encontrado el fichero
-                error = f"Error 404 File '{c_file_name}' not found."
-                print(f"[Server]: {error}")
-                tx_bytes = pickle.dumps(error)
+            tx_bytes = []
+            if c_file_name in ficheros:
+                try:
+                    fichero_leido = open("files/"+c_file_name)
+                    
+                    # se ha enocntrado el fichero
+                    tx_bytes = pickle.dumps(fichero_leido)
+                except :
+                    # no se ha encontrado el fichero
+                    error = f"Error 404 File '{c_file_name}' not found."
+                    print(f"[Server]: {error}")
+                    tx_bytes = pickle.dumps(error)
             connection.sendall(tx_bytes)
         elif c_instr == "bye":
             # Intruccion para dar por finalizada la comunicacion
