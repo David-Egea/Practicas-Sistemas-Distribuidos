@@ -38,17 +38,16 @@ while server_on:
             print(f"[Client]: Get {c_file_name}")
             # Se busca el fichero
             tx_bytes = []
-            if c_file_name in ficheros:
-                try:
-                    fichero_leido = open("files/"+c_file_name)
-                    
-                    # se ha enocntrado el fichero
-                    tx_bytes = pickle.dumps(fichero_leido)
-                except :
-                    # no se ha encontrado el fichero
-                    error = f"Error 404 File '{c_file_name}' not found."
-                    print(f"[Server]: {error}")
-                    tx_bytes = pickle.dumps(error)
+            try:
+                fichero_leido = open(path+"\\files\\"+c_file_name)
+                print(fichero_leido)
+                # se ha enocntrado el fichero
+                tx_bytes = pickle.dumps(fichero_leido.read())
+            except :
+                # no se ha encontrado el ficher
+                error = f"Error 404 File '{c_file_name}' not found."
+                print(f"[Server]: {error}")
+                tx_bytes = pickle.dumps(error)
             connection.sendall(tx_bytes)
         elif c_instr == "bye":
             # Intruccion para dar por finalizada la comunicacion
