@@ -9,8 +9,7 @@ client_b = Client()
 print("Client C")
 client_c = Client()
 
-#Nadie va a mostrar el mensaje de a, 
-# puesto que es el primero en unirse al grupo
+#Nadie va a mostrar el mensaje de a, puesto que es el primero en meterse en el grupo
 client_a.join_group()
 client_b.join_group()
 client_c.join_group()
