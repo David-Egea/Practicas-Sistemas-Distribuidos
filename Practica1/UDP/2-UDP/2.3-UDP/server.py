@@ -1,5 +1,6 @@
 import socket
 import pickle
+import time 
 
 """ Servidor Socket UDP """
 
@@ -33,10 +34,10 @@ while True:
         server_socket.sendto(s_payload,client_address)
         break
     else:
-        time = time.time()
-        s_payload = pickle.dumps(time)
+        tiempo = time.time()
+        s_payload = pickle.dumps(tiempo)
         server_socket.sendto(s_payload,client_address)
-        print(f"[Servidor]: '{time}'")
+        print(f"[Servidor]: '{tiempo}'")
 
 # Al salir de la comunicacion cierra el servidor 
 server_socket.close()

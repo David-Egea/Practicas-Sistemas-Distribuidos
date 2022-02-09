@@ -24,7 +24,7 @@ if terminal:
             print(f"[Cliente]: El id de cliente introducido '{client_id}' no es valido.")
     except:
         print(f"[Cliente]: El puerto '{server_port}' no es valido.")
-   
+
 else:
     # Direccion del servidor
     server_ip = "127.0.0.1"

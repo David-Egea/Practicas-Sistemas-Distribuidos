@@ -5,7 +5,7 @@ import time
 
 server_ip = argv[1] # Ip del servidor como 1er argumento
 server_port = argv[2] # Puerto del servidor como 2do argumento
-client_id = argv[3] # Ip del cliente como 3er argumento
+client_id = argv[3] # Id del cliente como 3er argumento
 
 server_port = int(server_port)
 client_id = int(client_id)
