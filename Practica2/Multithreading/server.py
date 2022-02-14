@@ -1,58 +1,62 @@
 import socket
 import sys
+from threading import Thread, Lock
 import traceback
-from threading import Thread
 
 def main():
     start_server()
         
 def start_server():
-    host = "localhost"
-    port = 6780
     # Pregunta la dirección para levantar el servicio
-    server_ip = input("[Servidor] Introduzca una dirección IP para levantar el servicio: ")
-    # Pregunta el puerto donde levantar dicho servcicio
+    # server_ip = input("[Servidor] Introduzca una dirección IP para levantar el servicio: ")
+    server_ip = "127.0.0.1"
+    # Pregunta el puerto hasta que se introduce uno valido
     while True:
+        # Pregunta el puerto donde levantar dicho servcicio
+        port = input("[Servidor] Introduzca un puerto para levantar el servicio: ")
         try:
-            server_port = int(input("[Servidor] Introduzca un puerto para levantar el servicio: "))
+            # Se convierte la cadena de caracteres a un entero
+            server_port = int(port)
+            break
         except ValueError:
-            print("[Servidor] El puerto introducido {} no es un puerto válido: ")
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print("Socket created")
+            print(f"[Servidor] El puerto introducido '{port}' no es un puerto válido.\n")
+    # Se crea el socket del servidor 
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print("[Servidor] El servidor se ha creado correctamente.")
     try:
-        sock.bind((host, port))
+        # Server binding
+        server_socket.bind((server_ip,server_port))
     except:
-        print("Bind failed. Error : " + str(sys.exc_info()))
+        print(f"[Servidor] Ha fallado la asignación de la dirección al servidor. ({sys.exc_info()})")
         sys.exit()
-    sock.listen() 
+    # El servidor se mantiene a la espera 
+    server_socket.listen() 
     # infinite loop- do not reset for every requests
     while True:
-        print("Socket now listening")
-        connection, address = sock.accept()
-        ip, port = str(address[0]), str(address[1])
-        print("Connection from client " + ip + ":" + port)
+        print("\n[Servidor] El servidor está a la escucha...")
+        # Espera conexiones de clientes
+        client, (ip, port) = server_socket.accept()
+        print(f"\n[Servidor] Se ha conectado un cliente en la dirección {ip} con puerto {port}.")
         try:
-            Thread(target=clientThread, args=(connection, ip, port)).start()
+            Thread(target=clientThread,args=(client,1024)).start()
         except:
-            print("Thread did not start.")
+            print("\n[Servidor] Ha fallado la creación del Thread!")
             traceback.print_exc()
-    sock.close()
     
-def clientThread(connection, ip, port, max_buffer_size = 1024):
-    is_active = True
-    while is_active:
-        client_input = connection.recv(max_buffer_size).decode("utf8")
-        clientid,msg=client_input.split(":")
-        if "quit" in msg:
-            print("Client {} is requesting to quit".format(clientid))
-            connection.close()
-            print("Connection " + ip + ":" + port + " closed")
-            is_active = False
-        else:
-            print("Client {} sent data: {}".format(clientid,msg))
-            connection.send("ok".encode("utf8"))
+def clientThread(client, max_buffer_size = 1024):
+    # El mensaje enviado por el cliente
+    msg = client.recv(max_buffer_size).decode("utf8")
+    # Se bloquea el print para ese cliente
+    global print_lock
+    print_lock.acquire()
+    print(f"\n[Cliente]: {msg}")
+    # Se libera el print
+    print_lock.release()
+    # Se envía el mensaje enviado al cliente de vuelta a modo de confirmación
+    client.sendall(msg.encode())
 
 if __name__ == "__main__":
+    global print_lock
+    print_lock = Lock()
     main()
