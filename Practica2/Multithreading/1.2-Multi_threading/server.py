@@ -34,14 +34,14 @@ def start_server():
     server_socket.listen() 
     # infinite loop- do not reset for every requests
     while True:
-        print("\n[Servidor] El servidor está a la escucha...")
+        print("[Servidor] El servidor está a la escucha...")
         # Espera conexiones de clientes
         client, (ip, port) = server_socket.accept()
-        print(f"\n[Servidor] Se ha conectado un cliente en la dirección {ip} con puerto {port}.")
+        print(f"[Servidor] Se ha conectado un cliente en la dirección {ip} con puerto {port}.")
         try:
             Thread(target=clientThread,args=(client,1024)).start()
         except:
-            print("\n[Servidor] Ha fallado la creación del Thread!")
+            print("[Servidor] Ha fallado la creación del Thread!")
             traceback.print_exc()
     
 def clientThread(client, max_buffer_size = 1024):
@@ -50,7 +50,7 @@ def clientThread(client, max_buffer_size = 1024):
     # Se bloquea el print para ese cliente
     global print_lock
     print_lock.acquire()
-    print(f"\n[Cliente]: {msg}")
+    print(f"[Cliente]: {msg}")
     # Se libera el print
     print_lock.release()
     # Se envía el mensaje enviado al cliente de vuelta a modo de confirmación

@@ -12,7 +12,6 @@ def send_msg_to_server(direccion,msg: str = "Hi TCP Server") -> None:
         print(f"[Server]: {data}")
         socket_client.close()
 
-
 if __name__ == "__main__":
     correcto = False
 
@@ -20,7 +19,6 @@ if __name__ == "__main__":
         try:
             puerto = int(input("[Cliente] Introduzca un puerto para levantar el servicio: "))
             direccion = ('127.0.0.1',puerto)
-        
             correcto = True
         except:
             print("Introduzca un puerto correcto")
@@ -35,7 +33,5 @@ if __name__ == "__main__":
             continuar = False
     #Se recorre la lista de mensajes para enviar
     for mensaje in mensajes_clientes:
-        
         Thread(target = send_msg_to_server,args = (direccion,mensaje)).start()
         print("[Cliente] Se está enviando el mensaje '{}'".format(mensaje))
-

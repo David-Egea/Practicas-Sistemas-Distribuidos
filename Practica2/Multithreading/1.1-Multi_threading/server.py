@@ -1,6 +1,6 @@
 import socket
 import sys
-from threading import Thread, Lock
+from threading import Thread
 import traceback
 
 def main():
