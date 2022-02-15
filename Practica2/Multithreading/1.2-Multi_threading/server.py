@@ -50,7 +50,9 @@ def clientThread(client, max_buffer_size = 1024):
     # Se bloquea el print para ese cliente
     global print_lock
     print_lock.acquire()
-    print(f"[Cliente]: {msg}")
+    print(f"[Cliente]: {msg} (1/3)")
+    print(f"[Cliente]: {msg} (2/3)")
+    print(f"[Cliente]: {msg} (3/3)")
     # Se libera el print
     print_lock.release()
     # Se envía el mensaje enviado al cliente de vuelta a modo de confirmación

@@ -47,7 +47,9 @@ def start_server():
 def clientThread(client, max_buffer_size = 1024):
     # El mensaje enviado por el cliente
     msg = client.recv(max_buffer_size).decode("utf8")
-    print(f"[Cliente]: {msg}")
+    print(f"[Cliente]: {msg} (1/3)")
+    print(f"[Cliente]: {msg} (2/3)")
+    print(f"[Cliente]: {msg} (3/3)")
     # Se envía el mensaje enviado al cliente de vuelta a modo de confirmación
     client.sendall(msg.encode())
 
