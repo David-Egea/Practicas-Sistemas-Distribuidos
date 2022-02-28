@@ -62,11 +62,11 @@ def get_all_base_dest():
 def get_move_by_day():
     """ Returns all the moves in the given day. 
         Usage examples:
-        - /api/v1.0/moves?date=01/06/2019
-        - /api/v1.0/moves?date=01/06/2019&orig=146
-        - /api/v1.0/moves?date=01/06/2019&orig=146&dest=162
-        - /api/v1.0/moves?date=01/06/2019&min=300&max=400
-        - /api/v1.0/moves?date=01/06/2019&orig=146&dest=162&min=300
+        - http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019
+        - http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&orig=146
+        - http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&orig=146&dest=162
+        - http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&min=300&max=400
+        - http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&orig=146&dest=162&min=300
     """
     if request.method == 'GET':
         response = []
