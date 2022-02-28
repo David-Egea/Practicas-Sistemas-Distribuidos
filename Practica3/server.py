@@ -3,11 +3,30 @@ from flask import Flask, jsonify, request
 import datetime
 import json
 import psycopg2
+from flask_httpauth import HTTPBasicAuth
+import sys
 
+app = Flask(__name__)
+
+from flask_httpauth import HTTPBasicAuth
+auth = HTTPBasicAuth()
+
+# TODO: Cambiar de BBDD sistemasdistribuidos3 -> sistemasdistribuidos2
 
 #Se crea la conexión con la base de datos
 database = psycopg2.connect("host=casamanzano.duckdns.org port=6000 dbname=postgres user=postgres password=Icai2022")
 app = Flask(__name__)
+
+@auth.verify_password
+def verify_password(username, password):
+    path = sys.path[0] + "\\users.pass"
+    with open(path, 'r') as file:
+            data = file.readlines()
+            users=dict([i.split(':') for i in data])
+    if username in users and password==users[username][:-1]: 
+        # remove las character \n
+        return True
+    return False
 
 @app.route('/api/v1.0/date', methods=['GET'])
 def get_data():
@@ -57,7 +76,43 @@ def get_all_base_dest():
         elif row[0] not in response:
             response.append(row[0])
     return jsonify({'stations': response})
+    
 
+@app.route('/api/v1.0/newmove', methods=['POST'])
+@auth.login_required
+def set_line():
+    
+    """ Creates a new move in the Database.
+        
+        "data": [
+        {
+            "age_range": 0,
+            "date": "28/02/2021",
+            "file": 0,
+            "id_dest": 160,
+            "id_dest_base": 26,
+            "id_orig": 163,
+            "id_orig_base": 4,
+            "travel_time": 543,
+            "user_type": 2
+        }
+    ]
+    """
+    date = request.json.get('date')
+    age_range = request.json.get('age_range')
+    user_type = request.json.get('user_type')
+    id_orig = request.json.get('id_orig')
+    id_dest = request.json.get('id_dest')
+    id_orig_base = request.json.get('id_orig_base')
+    id_dest_base = request.json.get('id_dest_base')
+    travel_time = request.json.get('travel_time')
+    file = '000000'
+
+    cur = database.cursor()
+    cur.execute("INSERT INTO sistemasdistribuidos3 (fecha, ageRange,user_type, idunplug_station, idplug_station, idunplug_base, idplug_base,travel_time,fichero) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(date,age_range,user_type,id_orig,id_dest,id_orig_base,id_dest_base,travel_time,file,))
+    
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+    
 @app.route('/api/v1.0/moves', methods=['GET'])
 def get_move_by_day():
     """ Returns all the moves in the given day. 
