@@ -11,7 +11,7 @@ app = Flask(__name__)
 from flask_httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
 
-# TODO: Cambiar de BBDD sistemasdistribuidos3 -> sistemasdistribuidos2
+# TODO: Cambiar de BBDD sistemasdistribuidos2 -> sistemasdistribuidos2
 
 #Se crea la conexión con la base de datos
 database = psycopg2.connect("host=casamanzano.duckdns.org port=6000 dbname=postgres user=postgres password=Icai2022")
@@ -28,6 +28,52 @@ def verify_password(username, password):
         return True
     return False
 
+@app.route('/api/v1.0/delmove', methods=['DELETE'])
+@auth.login_required
+def delete_move():
+    """ Deletes the database entries which coincide with the given arguments. 
+        - http://127.0.0.1:6878/api/v1.0/delmove?date=01/06/2019&orig=146&dest=162
+    """
+    if request.method == 'DELETE':
+        date = request.args.get('date')
+        orig = request.args.get('orig')
+        dest = request.args.get('dest')
+        user_type = request.args.get('user_type')
+        base_orig = request.args.get('base_orig')
+        base_dest = request.args.get('base_dest')
+        file = request.args.get('file')
+
+        query = "DELETE from sistemasdistribuidos2 WHERE"
+        data = ()
+        cur = database.cursor()
+        if date is not None:
+            query = "DELETE from sistemasdistribuidos2 WHERE fecha = %s"
+            data = (date,)
+        if orig is not None:
+            query = query + " and idunplug_station = %s"
+            data = data + (orig,)
+        if dest is not None:
+            query = query + " and idplug_station = %s"
+            data = data + (dest,)
+        if base_orig is not None:
+            query = query + " and idunplug_base = %s"
+            data = data + (base_orig,)
+        if base_dest is not None:
+            query = query + " and idplug_base = %s"
+            data = data + (base_dest,)
+        if file is not None:
+            query = query + " and fichero = %s"
+            data = data + (file,)
+        if user_type is not None:
+            query = query + " and user_type = %s"
+            data = data + (user_type,)
+    # Deletes the data
+    cur = database.cursor()
+    print(query)
+    cur.execute(query,data)
+  
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
 @app.route('/api/v1.0/date', methods=['GET'])
 def get_data():
 	#http://127.0.0.1:6878/api/v1.0/date
@@ -38,7 +84,7 @@ def get_data():
 def get_dates():
     """ Returns all dates."""
     cur = database.cursor()
-    cur.execute("SELECT fecha from sistemasdistribuidos3")
+    cur.execute("SELECT fecha from sistemasdistribuidos2")
     response = []
     while True:
         row = cur.fetchone()
@@ -52,7 +98,7 @@ def get_dates():
 def get_all_base_orig():
     """ Returns all origin stations. """
     cur = database.cursor()
-    cur.execute("SELECT idunplug_station from sistemasdistribuidos3")
+    cur.execute("SELECT idunplug_station from sistemasdistribuidos2")
     response = []
     row = cur.fetchone()
     while True:
@@ -67,7 +113,7 @@ def get_all_base_orig():
 def get_all_base_dest():
     """ Returns all destination stations. """
     cur = database.cursor()
-    cur.execute("SELECT idplug_station from sistemasdistribuidos3")
+    cur.execute("SELECT idplug_station from sistemasdistribuidos2")
     response = []
     row = cur.fetchone()
     while True:
@@ -109,7 +155,7 @@ def set_line():
     file = '000000'
 
     cur = database.cursor()
-    cur.execute("INSERT INTO sistemasdistribuidos3 (fecha, ageRange,user_type, idunplug_station, idplug_station, idunplug_base, idplug_base,travel_time,fichero) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(date,age_range,user_type,id_orig,id_dest,id_orig_base,id_dest_base,travel_time,file,))
+    cur.execute("INSERT INTO sistemasdistribuidos2 (fecha, ageRange,user_type, idunplug_station, idplug_station, idunplug_base, idplug_base,travel_time,fichero) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(date,age_range,user_type,id_orig,id_dest,id_orig_base,id_dest_base,travel_time,file,))
     
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
     
@@ -132,7 +178,7 @@ def get_move_by_day():
         max = request.args.get('max')
         cur = database.cursor()
         if date is not None:
-            query = "SELECT * from sistemasdistribuidos3 where fecha = %s"
+            query = "SELECT * from sistemasdistribuidos2 where fecha = %s"
             data = (date,)
             if orig is not None:
                 # /api/v1.0/moves?date=01/06/2019&orig=146
