@@ -172,49 +172,48 @@ def get_move_by_day():
         * http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&min=300&max=400
         * http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&orig=146&dest=162&min=300
     """
-    if request.method == 'GET':
-        # Initializes response
-        response = []
-        # Captures the data fields from the get request
-        date = request.args.get('date')
-        orig = request.args.get('orig')
-        dest = request.args.get('dest')
-        min = request.args.get('min')
-        max = request.args.get('max')
-        # Creates database cursor
-        cur = database.cursor()
-        if date is not None:
-            # Defines the initial query 
-            query = f"SELECT * FROM {TABLE} WHERE fecha = '{date}'"
-            if orig is not None:
-                # /api/v1.0/moves?date=01/06/2019&orig=146
-                query = f"{query} AND idunplug_station = {orig}"
-            if dest is not None:
-                # /api/v1.0/moves?date=01/06/2019&dest=162
-                query = f"{query} AND idplug_station = {dest}"
-            if min is not None:
-                # /api/v1.0/moves?date=01/06/2019&min=400
-                query = f"{query} AND travel_time >= {min}"
-            if max is not None:
-                # /api/v1.0/moves?date=01/06/2019&max=500
-                query = f"{query} AND travel_time <= {max}"
-            # Orders by date
-            query = f"{query} ORDER BY fecha"
-            # Executes the query action
-            cur.execute(query)
-            # For all the rows
-            while True:
-                # Gets a row from DB
-                row = cur.fetchone()
-                # If row is None quits
-                if row is None:
-                    break
-                # Adds the row to the response
-                response.append(dict(zip(["date","age_range","user_type","id_orig","id_dest","id_orig_base","id_dest_base","travel_time","file"],row)))
-        # Closes cursor
-        cur.close()
-        # Returns the response
-        return jsonify({'data': response})
+    # Initializes response
+    response = []
+    # Captures the data fields from the get request
+    date = request.args.get('date')
+    orig = request.args.get('orig')
+    dest = request.args.get('dest')
+    min = request.args.get('min')
+    max = request.args.get('max')
+    # Creates database cursor
+    cur = database.cursor()
+    if date is not None:
+        # Defines the initial query 
+        query = f"SELECT * FROM {TABLE} WHERE fecha = '{date}'"
+        if orig is not None:
+            # /api/v1.0/moves?date=01/06/2019&orig=146
+            query = f"{query} AND idunplug_station = {orig}"
+        if dest is not None:
+            # /api/v1.0/moves?date=01/06/2019&dest=162
+            query = f"{query} AND idplug_station = {dest}"
+        if min is not None:
+            # /api/v1.0/moves?date=01/06/2019&min=400
+            query = f"{query} AND travel_time >= {min}"
+        if max is not None:
+            # /api/v1.0/moves?date=01/06/2019&max=500
+            query = f"{query} AND travel_time <= {max}"
+        # Orders by date
+        query = f"{query} ORDER BY fecha"
+        # Executes the query action
+        cur.execute(query)
+        # For all the rows
+        while True:
+            # Gets a row from DB
+            row = cur.fetchone()
+            # If row is None quits
+            if row is None:
+                break
+            # Adds the row to the response
+            response.append(dict(zip(["date","age_range","user_type","id_orig","id_dest","id_orig_base","id_dest_base","travel_time","file"],row)))
+    # Closes cursor
+    cur.close()
+    # Returns the response
+    return jsonify({'data': response})
 
 @app.route('/api/v1.0/delmove', methods=['DELETE'])
 @auth.login_required
@@ -223,41 +222,40 @@ def delete_move():
     Deletes the database entries which coincide with the given arguments. 
         *   http://127.0.0.1:6878/api/v1.0/delmove?date=01/06/2019&orig=146&dest=162
     """
-    if request.method == 'DELETE':
-        # Captures the data fields from the get request
-        date = request.args.get('date')
-        orig = request.args.get('orig')
-        dest = request.args.get('dest')
-        user_type = request.args.get('user_type')
-        base_orig = request.args.get('base_orig')
-        base_dest = request.args.get('base_dest')
-        file = request.args.get('file')
-        # Creates database cursor
-        cur = database.cursor()
-        # Orders by date
-        query = f"DELETE from {TABLE} WHERE"
-        # Creates database cursor
-        cur = database.cursor()
-        if date is not None:
-            query = f"DELETE FROM sistemasdistribuidos2 WHERE fecha = '{date}'"
-        if orig is not None:
-            query = f"{query} AND idunplug_station = {orig}"
-        if dest is not None:
-            query = f"{query}  AND idplug_station = {dest}"
-        if base_orig is not None:
-            query = f"{query} AND idunplug_base = {base_orig}"
-        if base_dest is not None:
-            query = f"{query} AND idplug_base = {base_dest}"
-        if file is not None:
-            query = f"{query} AND fichero = {file}"
-        if user_type is not None:
-            query = f"{query} AND user_type = {user_type}"
-        # Executes the query action
-        cur.execute(query)
-        # Closes cursor
-        cur.close()
-        # Returns the response
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+    # Captures the data fields from the get request
+    date = request.args.get('date')
+    orig = request.args.get('orig')
+    dest = request.args.get('dest')
+    user_type = request.args.get('user_type')
+    base_orig = request.args.get('base_orig')
+    base_dest = request.args.get('base_dest')
+    file = request.args.get('file')
+    # Creates database cursor
+    cur = database.cursor()
+    # Orders by date
+    query = f"DELETE from {TABLE} WHERE"
+    # Creates database cursor
+    cur = database.cursor()
+    if date is not None:
+        query = f"DELETE FROM sistemasdistribuidos2 WHERE fecha = '{date}'"
+    if orig is not None:
+        query = f"{query} AND idunplug_station = {orig}"
+    if dest is not None:
+        query = f"{query}  AND idplug_station = {dest}"
+    if base_orig is not None:
+        query = f"{query} AND idunplug_base = {base_orig}"
+    if base_dest is not None:
+        query = f"{query} AND idplug_base = {base_dest}"
+    if file is not None:
+        query = f"{query} AND fichero = {file}"
+    if user_type is not None:
+        query = f"{query} AND user_type = {user_type}"
+    # Executes the query action
+    cur.execute(query)
+    # Closes cursor
+    cur.close()
+    # Returns the response
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
 if __name__ == '__main__':
     # app.run(debug=True,port=6878)

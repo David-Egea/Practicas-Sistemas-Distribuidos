@@ -172,49 +172,48 @@ def get_move_by_day():
         * http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&min=300&max=400
         * http://127.0.0.1:6878/api/v1.0/moves?date=01/06/2019&orig=146&dest=162&min=300
     """
-    if request.method == 'GET':
-        # Initializes response
-        response = []
-        # Captures the data fields from the get request
-        date = request.args.get('date')
-        orig = request.args.get('orig')
-        dest = request.args.get('dest')
-        min = request.args.get('min')
-        max = request.args.get('max')
-        # Creates database cursor
-        cur = database.cursor()
-        if date is not None:
-            # Defines the initial query 
-            query = f"SELECT * FROM {TABLE} WHERE fecha = '{date}'"
-            if orig is not None:
-                # /api/v1.0/moves?date=01/06/2019&orig=146
-                query = f"{query} AND idunplug_station = {orig}"
-            if dest is not None:
-                # /api/v1.0/moves?date=01/06/2019&dest=162
-                query = f"{query} AND idplug_station = {dest}"
-            if min is not None:
-                # /api/v1.0/moves?date=01/06/2019&min=400
-                query = f"{query} AND travel_time >= {min}"
-            if max is not None:
-                # /api/v1.0/moves?date=01/06/2019&max=500
-                query = f"{query} AND travel_time <= {max}"
-            # Orders by date
-            query = f"{query} ORDER BY fecha"
-            # Executes the query action
-            cur.execute(query)
-            # For all the rows
-            while True:
-                # Gets a row from DB
-                row = cur.fetchone()
-                # If row is None quits
-                if row is None:
-                    break
-                # Adds the row to the response
-                response.append(dict(zip(["date","age_range","user_type","id_orig","id_dest","id_orig_base","id_dest_base","travel_time","file"],row)))
-        # Closes cursor
-        cur.close()
-        # Returns the response
-        return jsonify({'data': response})
+    # Initializes response
+    response = []
+    # Captures the data fields from the get request
+    date = request.args.get('date')
+    orig = request.args.get('orig')
+    dest = request.args.get('dest')
+    min = request.args.get('min')
+    max = request.args.get('max')
+    # Creates database cursor
+    cur = database.cursor()
+    if date is not None:
+        # Defines the initial query 
+        query = f"SELECT * FROM {TABLE} WHERE fecha = '{date}'"
+        if orig is not None:
+            # /api/v1.0/moves?date=01/06/2019&orig=146
+            query = f"{query} AND idunplug_station = {orig}"
+        if dest is not None:
+            # /api/v1.0/moves?date=01/06/2019&dest=162
+            query = f"{query} AND idplug_station = {dest}"
+        if min is not None:
+            # /api/v1.0/moves?date=01/06/2019&min=400
+            query = f"{query} AND travel_time >= {min}"
+        if max is not None:
+            # /api/v1.0/moves?date=01/06/2019&max=500
+            query = f"{query} AND travel_time <= {max}"
+        # Orders by date
+        query = f"{query} ORDER BY fecha"
+        # Executes the query action
+        cur.execute(query)
+        # For all the rows
+        while True:
+            # Gets a row from DB
+            row = cur.fetchone()
+            # If row is None quits
+            if row is None:
+                break
+            # Adds the row to the response
+            response.append(dict(zip(["date","age_range","user_type","id_orig","id_dest","id_orig_base","id_dest_base","travel_time","file"],row)))
+    # Closes cursor
+    cur.close()
+    # Returns the response
+    return jsonify({'data': response})
 
 if __name__ == '__main__':
     # app.run(debug=True,port=6878)
