@@ -233,11 +233,11 @@ def delete_move():
     # Creates database cursor
     cur = database.cursor()
     # Orders by date
-    query = f"DELETE from {TABLE} WHERE"
+    query = f"DELETE from {TABLE} WHERE fecha = '{date}'"
     # Creates database cursor
     cur = database.cursor()
-    if date is not None:
-        query = f"DELETE FROM sistemasdistribuidos2 WHERE fecha = '{date}'"
+    if date is None:
+        return json.dumps({'success':False}), 400, {'ContentType':'application/json'} 
     if orig is not None:
         query = f"{query} AND idunplug_station = {orig}"
     if dest is not None:
