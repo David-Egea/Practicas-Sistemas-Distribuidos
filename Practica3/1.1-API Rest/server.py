@@ -127,19 +127,17 @@ def set_line():
     """ Creates a new move in the Database. Usage example:
             * http://127.0.0.1:6878/api/v1.0/newmove
         And an example of data passed:
-         "data": [
-            {
-                "age_range": 0,
-                "date": "28/02/2021",
-                "file": 0,
-                "id_dest": 160,
-                "id_dest_base": 26,
-                "id_orig": 163,
-                "id_orig_base": 4,
-                "travel_time": 543,
-                "user_type": 2
-            }
-    ]
+         {
+            "age_range": 0,
+            "date": "28/02/2021",
+            "file": 0,
+            "id_dest": 170,
+            "id_dest_base": 26,
+            "id_orig": 163,
+            "id_orig_base": 4,
+            "travel_time": 543,
+            "user_type": 2
+        }
     """
     # Captures the data fields from the post request
     date = request.json.get('date')
@@ -157,6 +155,7 @@ def set_line():
     query = f"INSERT INTO {TABLE} (fecha,ageRange,user_type,idunplug_station,idplug_station,idunplug_base,idplug_base,travel_time,fichero) \
         VALUES ({date},{age_range},{user_type},{id_orig},{id_dest},{id_orig_base},{id_dest_base},{travel_time},{file})"
     # Executes the query action
+    print(query)
     cur.execute(query)
     # Closes cursor
     cur.close()
