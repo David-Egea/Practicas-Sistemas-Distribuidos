@@ -1,2 +1,2 @@
 docker build -t prueba .
-sudo docker save -o prueba.txt prueba
+sudo docker save -o prueba.tar prueba
