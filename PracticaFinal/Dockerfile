@@ -6,7 +6,7 @@ RUN sudo apt update -y
 
 FROM python:3
 
-ADD my_script.py /
+
 
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
