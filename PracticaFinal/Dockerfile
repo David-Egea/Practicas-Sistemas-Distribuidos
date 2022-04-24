@@ -9,6 +9,8 @@ FROM python:3
 
 
 COPY requirements.txt requirements.txt
+COPY ServerNode.py ServerNode.py 
 RUN pip3 install -r requirements.txt
-
-CMD [ "python", "./my_script.py" ]
+RUN mkdir -p /filesToDo
+RUN mkdir -p /filesDone
+CMD [ "python", "./ServerNode.py" ]
