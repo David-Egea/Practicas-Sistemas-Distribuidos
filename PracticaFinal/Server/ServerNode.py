@@ -5,6 +5,7 @@ import traceback
 import os
 import cv2
 from pathlib import Path
+import pickle
 
 class ServerNode:
     def clientThread(self,client):
@@ -17,11 +18,12 @@ class ServerNode:
                 print_lock.acquire()
                 payload = self.loadJob()
                 print_lock.release()
+                payload = pickle.dumps(payload)
                 client.sendall(payload)
                 #Wait to recieve a message from the node
-                msg = client.recv(1024).decode()
+                msg = pickle.loads(client.recv(1024))
                 if msg == "Ok":
-                    proccesedPayload = client.recv(1024).decode()
+                    proccesedPayload = pickle.loads(client.recv(1024))
                     print_lock.acquire()
                     self.savePayload(proccesedPayload)
                     print_lock.release()
@@ -95,5 +97,7 @@ class ServerNode:
                 break
         return payload_process
 if __name__ == "__main__":
+    global print_lock
+    print_lock = Lock()
     #An object of node type is created
     nodo = ServerNode()
