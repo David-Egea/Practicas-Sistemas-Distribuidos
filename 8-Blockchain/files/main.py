@@ -1,5 +1,6 @@
 from block import Block
 from blockchain import Blockchain
+import API
 
 class Practica():
 
@@ -42,11 +43,51 @@ class Practica():
 
     def section1_5(self) -> None:
         """1.5 - Block Mining. """
+        # Creates a block chain
+        blockchain = Blockchain(difficulty=1)
+        # A new transaction is created
+        blockchain.add_new_transaction("Hola")
+        # Mining the transaction
+        blockchain.mine()
+        # A new transaction is created
+        blockchain.add_new_transaction("que")
+        # Mining the transaction
+        blockchain.mine()
+        # A new transaction is created
+        blockchain.add_new_transaction("tal")
+        # Mining the transaction
+        blockchain.mine()
+        # Checking the chain
+        blockchain.checkChain(blockchain.chain)
+
+    def section1_6(self) -> None:
+        """API Rest definition"""
+         # Creates a block chain
+        blockchain = Blockchain(difficulty=1)
+        # A new transaction is created
+        blockchain.add_new_transaction("Hola")
+        # Mining the transaction
+        blockchain.mine()
+        # A new transaction is created
+        blockchain.add_new_transaction("que")
+        # Mining the transaction
+        blockchain.mine()
+        # A new transaction is created
+        blockchain.add_new_transaction("tal")
+        # Mining the transaction
+        blockchain.mine()
+        # Checking the chain
+        blockchain.checkChain(blockchain.chain)
+        API.blockchain = blockchain
+        API.app.run(host='0.0.0.0', port=6000)
        
 
 if __name__ == "__main__":
     # Creates a practica
     p = Practica()
     # Evaluates the section 1.4
-    p.do_section("section1_4")
+    #p.do_section("section1_4")
+    # Evaluates the section 1.5
+    p.do_section("section1_6")
+
 
