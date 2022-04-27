@@ -6,19 +6,24 @@ import os
 import cv2
 from pathlib import Path
 import pickle
-
+from configuration import Configuration
+import time 
+import io
 class ServerNode:
     
     def __init__(self):
         
-        self.ip = "localhost"
-        self.port = 6000
-        self.directoryToDo = str(Path().absolute())+"\\PracticaFinal\\Server\\filesToDo"
-        self.directoryToSave = str(Path().absolute())+"\\PracticaFinal\\Server\\filesDone"
+        self.configuration = Configuration()
+        self.ip_address = self.configuration.get_config_param('network',"ip")
+        self.port = int(self.configuration.get_config_param("network","port"))
+        self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
+
+        self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("server","directoryToDo")
+        self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("server","directoryToSave")
         self.indexImage = 0
-        self.buffer_size = 4096
+        
         #Elements to process on each job
-        self.elements_load = 1
+        self.elements_load = int(self.configuration.get_config_param("server","elementsLoad"))
         
         # The socket of the server is created
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,7 +31,7 @@ class ServerNode:
         
         try:
             # Server binding
-            server_socket.bind((self.ip,self.port))
+            server_socket.bind((self.ip_address,self.port))
         except:
             print(f"UPS! something went wrong. ({sys.exc_info()})")
             sys.exit()
@@ -67,12 +72,13 @@ class ServerNode:
         payload_process = []
         i  = 0
         for element in listed_directory:
-            if i<= self.elements_load:
+            if i< self.elements_load:
                 image= cv2.imread(self.directoryToDo+"\\"+element)
+                i=i+1
                 payload_process.append(image)
                 #The image is deleted
                 #os.remove(self.directoryToDo+"\\"+element)
-                i=+1
+                
             else:
                 break
         print("Job loaded")
@@ -87,32 +93,31 @@ class ServerNode:
                 print_lock.acquire()
                 payload = self.loadJob()
                 print_lock.release()
-                payload = pickle.dumps(payload)
-                client.sendall(payload)
+                self.sendData(client,payload)
                 print("Sended")
 
                 #Wait to recieve a message from the node
                 data = self.recieve_data(client)
-                data = pickle.loads(data)
+                
                 #Data is saved
                 print_lock.acquire()
                 self.save_payload(data)
                 print_lock.release()
-
+                print("Data saved")
                 #Getting confirmation msg
                 msg = self.recieve_data(client)
-                msg = pickle.loads(msg)
-
+               
+                print("Confirmation recieved {}".format(msg))
                 if msg == "Ok":
                     print("Everything correct")
                     #Sending confirmation msg
                     conf_msg= "Ok"
-                    conf_msg = pickle.dumps(conf_msg)
-                    client.sendall(conf_msg)
+                    self.sendData(client,conf_msg)
                 else:
                     print("There is an error with the node")
     
                     break
+    """
     def recieve_data(self,client):
         data = bytearray()
         client.setblocking(True)
@@ -124,7 +129,37 @@ class ServerNode:
         except socket.error:
             print("Datos terminados")
             client.setblocking(True)
+            time.sleep(0.1)
             return data
+        """
+    def recieve_data(self,client):
+        try:
+            n_bytes = b""
+            byte = None
+            while byte != b"\r":
+                byte = client.recv(1)
+                n_bytes += byte
+
+            n_bytes = int(n_bytes)
+            buffer = io.BytesIO()
+            recibidos = 0
+            while recibidos < n_bytes:
+                msg = client.recv(self.buffer_size)
+                buffer.write(msg)
+                recibidos += len(msg)
+            buffer.seek(0)
+            data = pickle.loads(buffer.read())
+            print(data)
+        except:
+            print("Error")
+        time.sleep(0.1)
+        return data
+    def sendData(self,client,data):
+    
+        payload = pickle.dumps(data)
+        n_bytes = client.send(str(len(payload)).encode() + b"\r")
+        client.sendall(payload) 
+        
 if __name__ == "__main__":
     global print_lock
     print_lock = Lock()
