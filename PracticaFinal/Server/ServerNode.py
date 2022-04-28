@@ -117,21 +117,7 @@ class ServerNode:
                     print("There is an error with the node")
     
                     break
-    """
-    def recieve_data(self,client):
-        data = bytearray()
-        client.setblocking(True)
-        try:
-            while True:
-                data +=bytearray((client.recv(self.buffer_size)))
-                # A partir de ahora si no hay datos que leer finalizamos el bucle
-                client.setblocking(False)
-        except socket.error:
-            print("Datos terminados")
-            client.setblocking(True)
-            time.sleep(0.1)
-            return data
-        """
+    
     def recieve_data(self,client):
         try:
             n_bytes = b""

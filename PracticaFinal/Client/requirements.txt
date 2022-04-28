@@ -1,0 +1,5 @@
+<<<<<<< Updated upstream
+numpy
+=======
+>>>>>>> Stashed changes
+opencv-python

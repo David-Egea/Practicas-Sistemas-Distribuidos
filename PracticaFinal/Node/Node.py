@@ -6,7 +6,7 @@ from configuration import Configuration
 import time
 import io
 
-class Client:
+class Node:
     """ Clase Cliente TCP """
     
     def __init__(self) -> None:
@@ -108,4 +108,4 @@ class Client:
         
 
 if __name__ == "__main__":
-    client = Client()
+    node = Node()
