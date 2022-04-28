@@ -9,39 +9,39 @@ import pickle
 from configuration import Configuration
 import time 
 import io
+from Job import Job
+
 class ServerNode:
     
     def __init__(self):
         
         self.configuration = Configuration()
-        self.ip_address = self.configuration.get_config_param('network',"ip")
-        self.port = int(self.configuration.get_config_param("network","port"))
+        self.ip_address = self.configuration.get_config_param('server',"ip")
+        self.port = int(self.configuration.get_config_param("network","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
 
-        self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("server","directoryToDo")
-        self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("server","directoryToSave")
+        
         self.indexImage = 0
-        
-        #Elements to process on each job
-        self.elements_load = int(self.configuration.get_config_param("server","elementsLoad"))
-        
+                
         # The socket of the server is created
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
         try:
             # Server binding
-            server_socket.bind((self.ip_address,self.port))
+            self.server_socket.bind((self.ip_address,self.port))
         except:
             print(f"UPS! something went wrong. ({sys.exc_info()})")
             sys.exit()
+    def activate(self):
+         
         # The server starts to listen 
         print("The server node is listening on the port {}".format(self.port))
-        server_socket.listen() 
+        self.server_socket.listen() 
         # infinite loop- do not reset for every requests
         while True:
             # Waiting a client
-            client, (ip, port) = server_socket.accept()
+            client, (ip, port) = self.server_socket.accept()
             print(f"There is a client with the ip: {ip} and port {port}.")
             try:
                 Thread(target=self.clientThread,args=(client,1024)).start()
@@ -51,39 +51,42 @@ class ServerNode:
     
     def checkMissingJob(self):
         """Function to check is there are any missing jobs to be done"""
-        listed_directory = os.listdir(self.directoryToDo)
-        if len(listed_directory)>0:
-            return True
-        else:
-            return False
-    def save_payload(self,payload):
-        """Function to save the results of the processing"""
-        for element in payload:
-            #Writing the image
-            print(self.directoryToSave+"\\"+str(self.indexImage)+".jpg")
-            cv2.imwrite(self.directoryToSave+"\\"+str(self.indexImage)+".jpg",element)
-            #Incrementing the index by one
-            self.indexImage = self.indexImage+1
-    def loadJob(self):
+        #TODO
+    def save_job(self,flag,job):
+        """Function to save a job"""
+        if flag == 'Done':
+            #First jobs are loaded
+            jobs = self.load_jobs(flag)
+
+            #The job is appended
+            jobs.append(job)
+
+            #Jobs are saved
+            with open('done/jobs.list', 'wb') as fileSave:
+                pickle.dump(jobs, fileSave)
+
+        elif flag == 'ToDo':
+            #First jobs are loaded
+            jobs = self.load_jobs(flag)
+            
+            #The job is appended
+            jobs.append(job)
+
+            #Jobs are saved
+            with open('done/jobs.list', 'wb') as fileSave:
+                pickle.dump(jobs, fileSave)
+
+    def load_jobs(self,flag):
+        # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
-        print("Loading jobs")
-        print(self.directoryToDo)
-        listed_directory = os.listdir(self.directoryToDo)
-        payload_process = []
-        i  = 0
-        for element in listed_directory:
-            if i< self.elements_load:
-                image= cv2.imread(self.directoryToDo+"\\"+element)
-                i=i+1
-                payload_process.append(image)
-                #The image is deleted
-                #os.remove(self.directoryToDo+"\\"+element)
-                
-            else:
-                break
+        with open('done/jobs.list', 'rb') as fileLoad:
+                jobs = pickle.load(fileLoad)
+                fileLoad.close()
         print("Job loaded")
-        return payload_process
+        return jobs
+
     def clientThread(self,client,dummy):
+        #TODO: cambiar toda la lógica de guardado para adaptarla a jobs
         """Function to manage the conection of each client"""
         global print_lock
         while True:
