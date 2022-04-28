@@ -3,9 +3,11 @@ from threading import Thread, Lock
 import sys
 import traceback
 import os
-import cv2
 from pathlib import Path
 import pickle
+import numpy as np
+
+from numpy import true_divide
 from configuration import Configuration
 import time 
 import io
@@ -21,8 +23,8 @@ class ServerNode:
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
 
         
-        self.indexImage = 0
-                
+        self.elements_load = int(self.configuration.get_config_param("comms","buffer_size")) 
+
         # The socket of the server is created
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -38,7 +40,7 @@ class ServerNode:
         # The server starts to listen 
         print("The server node is listening on the port {}".format(self.port))
         self.server_socket.listen() 
-        # infinite loop- do not reset for every requests
+        #Iinfinite loop- do not reset for every requests
         while True:
             # Waiting a client
             client, (ip, port) = self.server_socket.accept()
@@ -49,9 +51,12 @@ class ServerNode:
                 print("Thread creation has failed")
                 traceback.print_exc()
     
-    def checkMissingJob(self):
+    def check_missing_jobs(self):
         """Function to check is there are any missing jobs to be done"""
-        #TODO
+        if len(os.listdir("/todo"))>0:
+            return True
+        else:
+            return False
     def save_job(self,flag,job):
         """Function to save a job"""
         if flag == 'Done':
@@ -75,51 +80,96 @@ class ServerNode:
             #Jobs are saved
             with open('done/jobs.list', 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
+    def is_job_done(self,client_id):
+        # TODO: adaptarlo a jobs fragmentados
+        # First all the jobs are loaded
+        jobs_loaded = self.load_jobs("Done")
+        for job in jobs_loaded:
+            if job.client_id == client_id:
+                return True,job
+        return False
 
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
-        with open('done/jobs.list', 'rb') as fileLoad:
-                jobs = pickle.load(fileLoad)
-                fileLoad.close()
+        if flag == "Done":
+            with open('done/jobs.list', 'rb') as fileLoad:
+                if len(os.listdir("/done"))>0:
+                    jobs = pickle.load(fileLoad)
+                    fileLoad.close()
+                else:
+                    jobs = []
+        elif flag == "ToDo":   
+            with open('done/jobs.list', 'rb') as fileLoad:
+                if len(os.listdir("/done"))>0:
+                    jobs = pickle.load(fileLoad)
+                    fileLoad.close()
+                else:
+                    jobs = []
         print("Job loaded")
         return jobs
+    
+    def fragment_job(self,job):
+        """Function to check if a job needs to be fragmented"""
+        jobs_fragmented = []
+        if len(job.payload)>self.elements_load:
+            
+            # Calculating the number of jobs to create
+            fragments = np.ceil(len(job.payload)/self.elements_load)
+            # Iterating over the number of fragments
+            actual_fragment = 0
+            for i in range(0,fragments):
+                # Calculating the number of elements 
+                if actual_fragment+self.elements_load>=len(job.payload):
+                    calculated_payload = job.payload[actual_fragment:len(len(job.payload))]
+                else:
+                    calculated_payload = job.payload[actual_fragment:actual_fragment+self.elements_load]
+                actual_fragment = actual_fragment+self.elements_load
+                new_job = Job(calculated_payload,job.client_id,job.ip)
+                #adding the control variables
+                new_job.sequence = i
+                new_job.fragments = fragments
+                jobs_fragmented.append(new_job)
+        else:
+            jobs_fragmented.append(job)
+
+        return jobs_fragmented
+
+
 
     def clientThread(self,client,dummy):
-        #TODO: cambiar toda la lógica de guardado para adaptarla a jobs
         """Function to manage the conection of each client"""
         global print_lock
         while True:
-            #Check missing jobs
-            if self.checkMissingJob():
-                print("There are missing jobs")
-                print_lock.acquire()
-                payload = self.loadJob()
-                print_lock.release()
-                self.sendData(client,payload)
-                print("Sended")
+            # Waits to recieve a job from the client
+            job_to_do = self.recieve_data(client)
+            jobs_fragmented = self.fragment_job(job_to_do)
+            # Getting the client id
+            client_id = job_to_do.client_id
+            #The job is in the list to be done
+            for job_to_save in jobs_fragmented:    
+                self.save_job("ToDo",job_to_save)
+            print("Jobs saved")
 
-                #Wait to recieve a message from the node
-                data = self.recieve_data(client)
-                
-                #Data is saved
-                print_lock.acquire()
-                self.save_payload(data)
-                print_lock.release()
-                print("Data saved")
-                #Getting confirmation msg
-                msg = self.recieve_data(client)
-               
-                print("Confirmation recieved {}".format(msg))
-                if msg == "Ok":
-                    print("Everything correct")
-                    #Sending confirmation msg
-                    conf_msg= "Ok"
-                    self.sendData(client,conf_msg)
-                else:
-                    print("There is an error with the node")
-    
-                    break
+            # Waits to get the job done
+            while not self.is_job_done(client_id)[0]:
+                pass
+            print("Job finished")
+            # The job is sended to the client
+            job_to_send = self.is_job_done(client_id)[1]
+            self.send_data(client,job_to_send)
+            # Waits for the confirmation msg
+            msg = self.recieve_data(client)
+
+            if msg == "Ok":
+                print("Everything correct")
+                # Sending confirmation msg
+                conf_msg= "Ok"
+                self.sendData(client,conf_msg)
+            else:
+                print("There is an error with the node")
+
+                break
     
     def recieve_data(self,client):
         try:
@@ -143,7 +193,7 @@ class ServerNode:
             print("Error")
         time.sleep(0.1)
         return data
-    def sendData(self,client,data):
+    def send_data(self,client,data):
     
         payload = pickle.dumps(data)
         n_bytes = client.send(str(len(payload)).encode() + b"\r")
@@ -152,5 +202,5 @@ class ServerNode:
 if __name__ == "__main__":
     global print_lock
     print_lock = Lock()
-    #An object of node type is created
+    # An object of node type is created
     nodo = ServerNode()
