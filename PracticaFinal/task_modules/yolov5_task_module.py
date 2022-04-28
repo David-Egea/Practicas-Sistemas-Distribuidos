@@ -1,11 +1,11 @@
 from typing import List, Dict, Any, Tuple
-from Node.task_module import taskModule
+from task_modules.task_module import TaskModule
 import numpy as np
 import cv2
 import torch
 from configuration.configuration import Configuration
 
-class Yolov5TaskModule(taskModule):
+class Yolov5TaskModule(TaskModule):
     """ Task module child class. Performs a object detection on images using Yolov5. """
 
     def __init__(self) -> None:

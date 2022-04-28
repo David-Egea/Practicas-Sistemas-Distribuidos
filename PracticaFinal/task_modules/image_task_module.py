@@ -1,10 +1,9 @@
 from typing import List
-from Node.task_module import taskModule
+from task_modules.task_module import TaskModule
 import numpy as np
 import cv2
-from Node.task_module import taskModule
 
-class ImageTaskModule(taskModule):
+class ImageTaskModule(TaskModule):
     """ Task module child class. Performs image range transformation from BGR to Gray colorscale. """
 
     def __init__(self) -> None:

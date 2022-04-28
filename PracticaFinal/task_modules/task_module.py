@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class taskModule(ABC):
+class TaskModule(ABC):
     """ Task ABC module class"""
 
     def __init__(self, task: str) -> None:
