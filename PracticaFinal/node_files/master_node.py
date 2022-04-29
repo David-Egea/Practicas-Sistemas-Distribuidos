@@ -66,11 +66,11 @@ class MasterNode:
             1. k
             2. 
         """
-        # while True:
-        #     # Waits until a node request a connection
-        #     data = pickle.loads(slave_socket.recv(1024)) # TODO: CHECK BUFFER OF CLIENT
-        #     print(f"[Server]: Recieved from client: {data}")
-        #     message = eval(data) # Evaluates the data to get a dict
-        #     if message["sender"] not in self._slave_nodes_regist:
-        #         # New node connection
-        #         self._slave_nodes_regist[message["sender"]"] = 
+        while True:
+            # Waits until a node request a connection
+            data = pickle.loads(slave_socket.recv(1024)) # TODO: CHECK BUFFER OF CLIENT
+            print(f"[Server]: Recieved from client: {data}")
+            message = eval(data) # Evaluates the data to get a dict
+            # if message["sender"] not in self._slave_nodes_regist:
+                # New node connection
+                # self._slave_nodes_regist[message["sender"]] = 
