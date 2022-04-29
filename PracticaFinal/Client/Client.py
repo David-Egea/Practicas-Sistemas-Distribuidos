@@ -35,6 +35,7 @@ class Client:
         self.socket_client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.socket_client.connect(self.server_address)
         
+        self.main()
         #Waiting for the thread to finish
        
         print("Client finished")
@@ -90,10 +91,10 @@ class Client:
     def save_payload(self,payload):
         """Function to save the results of the processing"""
         for element in payload:
-            #Writing the image
+            # Writing the image
             print(self.directoryToSave+"\\"+str(self.indexImage)+".jpg")
             cv2.imwrite(self.directoryToSave+"\\"+str(self.indexImage)+".jpg",element)
-            #Incrementing the index by one
+            # Incrementing the index by one
             self.indexImage = self.indexImage+1
 
     def recieve_data(self):
@@ -127,14 +128,33 @@ class Client:
         payload = pickle.dumps(data)
         n_bytes = self.socket_client.send(str(len(payload)).encode() + b"\r")
         self.socket_client.sendall(payload) 
+
+    def main(self):
+        """Main thread for the application"""
+        while self.check_missing_payload():
+            photos = self.load_payload()
+            # Sending the job
+            self.send_job()
+
+            # Waits for the job to arrive
+            job_recieved = self.recieve_data()
+            self.save_payload(job_recieved.payload)
+
+            # Sends the confirmation msg
+            conf_msg = "Ok"
+            self.send_data(conf_msg)
+            # waits for the confirmation of the msg
+            msg = self.recieve_data()
+            if msg == "Ok":
+                print("Everything correct")
+        print("Loop finished")
+
         
       
 
 if __name__ == "__main__":
-    client = Client()
     try:
-        while True:
-            client.sendJob()
+        client = Client()
     except KeyboardInterrupt:
         print("Client finished")
     
