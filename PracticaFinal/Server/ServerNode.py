@@ -67,7 +67,7 @@ class ServerNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open('done/jobs.list', 'wb') as fileSave:
+            with open('ResponseOutBox/jobs.list', 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
 
         elif flag == 'ToDo':
@@ -78,7 +78,7 @@ class ServerNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open('done/jobs.list', 'wb') as fileSave:
+            with open('TaskInbox/jobs.list', 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
     def is_job_done(self,client_id):
         # TODO: adaptarlo a jobs fragmentados
@@ -93,14 +93,14 @@ class ServerNode:
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         if flag == "Done":
-            with open('done/jobs.list', 'rb') as fileLoad:
+            with open('ResponseOutBox/jobs.list', 'rb') as fileLoad:
                 if len(os.listdir("/done"))>0:
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
                 else:
                     jobs = []
         elif flag == "ToDo":   
-            with open('done/jobs.list', 'rb') as fileLoad:
+            with open('TaskInbox/jobs.list', 'rb') as fileLoad:
                 if len(os.listdir("/done"))>0:
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
