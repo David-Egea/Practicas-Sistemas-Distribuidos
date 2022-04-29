@@ -5,8 +5,8 @@ import traceback
 from pathlib import Path
 from multiprocessing import Process,Manager
 from configuration.configuration import Configuration
-from ServerNode import ServerNode
-from MasterNode import MasterNode
+from service_server import ServiceServer
+from master_node import MasterNode
 
 # TODO: CAMBIAR ESTA CLASE PARA QUE SEA EL SERVIDOR
 
@@ -23,7 +23,7 @@ class Server:
         self._config = Configuration(config_file_path=str(f"{Path()}\\PracticaFinal\\configuration\\config.ini"))
        
         self.master_node = MasterNode()
-        self.server_node = ServerNode()
+        self.server_node = ServiceServer()
 
     def start(self) -> None:
         """ Starts running the master node on the address specified. """
