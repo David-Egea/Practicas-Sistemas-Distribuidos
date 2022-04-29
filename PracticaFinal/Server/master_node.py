@@ -9,6 +9,7 @@ import pickle
 from configuration import Configuration
 import time 
 import io
+#TODO: cambiar orden llamada Job
 class ServerNode:
     
     def __init__(self):

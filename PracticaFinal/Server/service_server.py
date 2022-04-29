@@ -13,7 +13,7 @@ import time
 import io
 from Job import Job
 
-class ServerNode:
+class ServiceServer:
     
     def __init__(self):
         
