@@ -1,10 +1,10 @@
 import socket
 import cv2
 import pickle
-from configuration import Configuration
+from configuration.configuration import Configuration
 import time
 import io
-from Job import Job
+from utils.job import Job
 import random
 import os
 from pathlib import Path
@@ -19,36 +19,37 @@ class Client:
         self.port_server = int(self.configuration.get_config_param("network","port_server"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
         self.id = random.randint(1,1000)
-        #Calculating the ip
+        self.job_type = "process.image.color_to_gray"
+        # Calculating the ip
         self.get_ip()
 
-        #Variables to load data and save it
+        # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("server","directoryToDo")
         self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("server","directoryToSave")
         self.indexImage = 0
-        #Elements to process on each job
+        # Elements to process on each job
         self.elements_load = int(self.configuration.get_config_param("server","elementsLoad"))
         
 
-        #Creating the connection with the server
+        # Creating the connection with the server
         self.server_address = (self.ip_address_server,self.port_server) 
         self.socket_client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.socket_client.connect(self.server_address)
         
         self.main()
-        #Waiting for the thread to finish
+        # Waiting for the thread to finish
        
         print("Client finished")
 
     def send_job(self) -> None:
        """Function to create a new job"""
        if self.check_missing_payload:
-        #Loading data
+        # Loading data
         payload = self.load_payload()
         if len(payload)>0:
-            #Building the job object
-            job = Job(payload,self.client_id,self.ip)
-            #Sending data
+            # Building the job object
+            job = Job(self.client_id,self.job_type,payload)
+            # Sending data
             self.send_data(job)
         else:
             print("There is no missing payload to process")

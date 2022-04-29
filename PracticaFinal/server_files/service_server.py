@@ -11,10 +11,14 @@ from numpy import true_divide
 from configuration import Configuration
 import time 
 import io
-from Job import Job
+from utils.job import Job
 
 class ServiceServer:
-    
+    """ 
+        Service Server class: Instances of this class perform server functionality. Functionality:
+        * The server recieves requests from clients      * The configuration for this class is at slave_config.ini file
+
+            """
     def __init__(self):
         
         self.configuration = Configuration()
@@ -36,7 +40,7 @@ class ServiceServer:
             print(f"UPS! something went wrong. ({sys.exc_info()})")
             sys.exit()
     def activate(self):
-         
+        """ Function to activate the server service node"""
         # The server starts to listen 
         print("The server node is listening on the port {}".format(self.port))
         self.server_socket.listen() 
@@ -51,12 +55,7 @@ class ServiceServer:
                 print("Thread creation has failed")
                 traceback.print_exc()
     
-    def check_missing_jobs(self):
-        """Function to check is there are any missing jobs to be done"""
-        if len(os.listdir("/todo"))>0:
-            return True
-        else:
-            return False
+   
     def save_job(self,flag,job):
         """Function to save a job"""
         if flag == 'Done':
@@ -80,14 +79,37 @@ class ServiceServer:
             #Jobs are saved
             with open('TaskInbox/jobs.list', 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
+
     def is_job_done(self,client_id):
         # TODO: adaptarlo a jobs fragmentados
         # First all the jobs are loaded
+        jobs_return = []
         jobs_loaded = self.load_jobs("Done")
+        fragmented = False
         for job in jobs_loaded:
             if job.client_id == client_id:
-                return True,job
-        return False
+                # Checks for all the jobs needed
+                jobs_return.append(job)
+                if job.fragments>1:
+                    fragmented = True
+                    fragments = job.fragments
+        if len(jobs_return)>0:
+            if fragmented:
+                # If the job is fragmented, checks for all the pieces in the sequence
+                if len(jobs_return) != fragments:
+                    return False
+                else:
+                    #Creating 
+                    payload_joined = []
+                    for job_join in jobs_return:
+                        payload_joined.append(job_join.payload())
+                    job_joined = Job(jobs_return[0].client_id,jobs_return[0].job_type,payload_joined)
+                    
+                    return True,job_joined
+            else:
+                return True,jobs_return[0]
+        else:    
+            return False
 
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
@@ -125,7 +147,7 @@ class ServiceServer:
                 else:
                     calculated_payload = job.payload[actual_fragment:actual_fragment+self.elements_load]
                 actual_fragment = actual_fragment+self.elements_load
-                new_job = Job(calculated_payload,job.client_id,job.ip)
+                new_job = Job(job.client_id,job.job_type,calculated_payload)
                 #adding the control variables
                 new_job.sequence = i
                 new_job.fragments = fragments
@@ -203,4 +225,4 @@ if __name__ == "__main__":
     global print_lock
     print_lock = Lock()
     # An object of node type is created
-    nodo = ServerNode()
+    nodo = ServiceServer()

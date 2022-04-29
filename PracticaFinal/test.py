@@ -1,8 +1,10 @@
 import cv2
-from task_modules.yolov5_task_module import Yolov5TaskModule
-from task_modules.image_task_module import ImageTaskModule
-from node_files.master_node import MasterNode
+from slave_files.task_modules.yolov5_task_module import Yolov5TaskModule
+from slave_files.task_modules.image_task_module import ImageTaskModule
+# from server_files.master_node import MasterNode
+from slave_files.slave_node import SlaveNode
 import pathlib
+from utils.job import Job
 
 PATH = str(pathlib.Path().resolve())
 
@@ -48,10 +50,20 @@ def test_master_node():
     master = MasterNode()
     master.start()
 
+def test_job_class():
+    # Creates a new job
+    job = Job(client_id="A", job_type="process.image.color_to_gray", payload = [])
+    print(job.payload)
+    print(job.done)
+    job.payload = ["image0","image1","image2"]
+    print(job.payload)
+
 if __name__ == "__main__":
     # --- IMAGE TASK MODULE TEST ---
     # test_image_task_module()
     # --- YOLOV5 TASK MODULE TEST ---
     # test_yolo_task_module()
     # --- MASTER NODE TEST ---
-    test_master_node()
+    # test_master_node()
+    # --- JOB CLASS TEST ---
+    test_job_class()

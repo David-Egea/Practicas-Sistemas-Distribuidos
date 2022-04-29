@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Tuple
-from task_modules.task_module import TaskModule
+from slave_files.task_modules.task_module import TaskModule
 import numpy as np
 import cv2
 import torch
