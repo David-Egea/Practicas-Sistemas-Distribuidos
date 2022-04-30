@@ -11,7 +11,7 @@ from numpy import true_divide
 from configuration import Configuration
 import time 
 import io
-from utils.job import Job
+from job import Job
 
 class ServiceServer:
     """ 
@@ -21,9 +21,9 @@ class ServiceServer:
             """
     def __init__(self):
         
-        self.configuration = Configuration()
+        self.configuration = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\server_config.ini")
         self.ip_address = self.configuration.get_config_param('server',"ip")
-        self.port = int(self.configuration.get_config_param("network","port_external"))
+        self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
 
         
@@ -36,6 +36,7 @@ class ServiceServer:
         try:
             # Server binding
             self.server_socket.bind((self.ip_address,self.port))
+            
         except:
             print(f"UPS! something went wrong. ({sys.exc_info()})")
             sys.exit()
@@ -115,19 +116,19 @@ class ServiceServer:
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         if flag == "Done":
-            with open('ResponseOutBox/jobs.list', 'rb') as fileLoad:
-                if len(os.listdir("/done"))>0:
+            if os.path.exists('ResponseOutBox/jobs.list'):
+                with open('ResponseOutBox/jobs.list', 'rb') as fileLoad:
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
-                else:
-                    jobs = []
+            else:
+                jobs = []
         elif flag == "ToDo":   
-            with open('TaskInbox/jobs.list', 'rb') as fileLoad:
-                if len(os.listdir("/done"))>0:
+            if os.path.exists('TaskInbox/jobs.list'):
+                with open('TaskInbox/jobs.list', 'rb') as fileLoad: 
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
-                else:
-                    jobs = []
+            else:
+                jobs = []
         print("Job loaded")
         return jobs
     
@@ -174,7 +175,7 @@ class ServiceServer:
             print("Jobs saved")
 
             # Waits to get the job done
-            while not self.is_job_done(client_id)[0]:
+            while not self.is_job_done(client_id):
                 pass
             print("Job finished")
             # The job is sended to the client
@@ -226,3 +227,4 @@ if __name__ == "__main__":
     print_lock = Lock()
     # An object of node type is created
     nodo = ServiceServer()
+    nodo.activate()

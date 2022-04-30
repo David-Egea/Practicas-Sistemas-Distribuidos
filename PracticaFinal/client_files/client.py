@@ -1,10 +1,10 @@
 import socket
 import cv2
 import pickle
-from configuration.configuration import Configuration
+from configuration import Configuration
 import time
 import io
-from utils.job import Job
+from job import Job
 import random
 import os
 from pathlib import Path
@@ -14,7 +14,7 @@ class Client:
     """ TCP Client class """
     
     def __init__(self) -> None:
-        self.configuration = Configuration()
+        self.configuration = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\client_files\\client_config.ini")
         self.ip_address_server = self.configuration.get_config_param("network","ip_server")
         self.port_server = int(self.configuration.get_config_param("network","port_server"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
@@ -24,11 +24,11 @@ class Client:
         self.get_ip()
 
         # Variables to load data and save it
-        self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("server","directoryToDo")
-        self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("server","directoryToSave")
+        self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
+        self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("client","directoryToSave")
         self.indexImage = 0
         # Elements to process on each job
-        self.elements_load = int(self.configuration.get_config_param("server","elementsLoad"))
+        self.elements_load = int(self.configuration.get_config_param("client","elementsLoad"))
         
 
         # Creating the connection with the server
@@ -48,7 +48,7 @@ class Client:
         payload = self.load_payload()
         if len(payload)>0:
             # Building the job object
-            job = Job(self.client_id,self.job_type,payload)
+            job = Job(self.id,self.job_type,payload)
             # Sending data
             self.send_data(job)
         else:
@@ -99,6 +99,7 @@ class Client:
             self.indexImage = self.indexImage+1
 
     def recieve_data(self):
+        data = []
         try:
             n_bytes = b""
             byte = None
@@ -133,7 +134,6 @@ class Client:
     def main(self):
         """Main thread for the application"""
         while self.check_missing_payload():
-            photos = self.load_payload()
             # Sending the job
             self.send_job()
 
