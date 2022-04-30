@@ -4,7 +4,7 @@ import sys
 import traceback
 from pathlib import Path
 from multiprocessing import Process
-from configuration.configuration import Configuration
+from configuration import Configuration
 import pickle
 import os
 import time
@@ -22,14 +22,14 @@ class MasterNode:
         # Creates a list for registered slave nodes
         self._slave_nodes_regist = {}
         # Creates a configuration class
-        self._config = Configuration(config_file_path=str(f"{Path()}\\PracticaFinal\\configuration\\config.ini"))
+        self._config = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\server_config.ini")
         # Master node configuration
         self._master_ip = str(self._config.get_config_param("master","ip"))
         self._master_port = int(self._config.get_config_param("master","port_external"))
         # Creating the socket
         self._master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
+        self.buffer_size = int(self._config.get_config_param("comms","buffer_size"))
 
         try:
             # Attempts to bind the direction to the address
@@ -57,7 +57,7 @@ class MasterNode:
     def activate(self) -> None:
         """ Starts listening to available slave nodes, stablishing a communication with each of them. """
         self._master_socket.listen() # Master starts to listen on port
-        print(f"The server node at {self._master_ip} is listening on port {self._master_port}...")
+        print(f"The master node at {self._master_ip} is listening on port {self._master_port}...")
         # infinite loop-do not reset for every requests
         while True:
             # Waits until a new client connection
