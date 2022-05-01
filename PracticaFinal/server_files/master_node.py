@@ -8,6 +8,7 @@ from configuration import Configuration
 import pickle
 import os
 import time
+import io
 
 # TODO:Checkear que las funciones son correctas
 class MasterNode:
@@ -46,13 +47,13 @@ class MasterNode:
 
     def check_missing_jobs(self):
         """Function to check is there are any missing jobs to be done"""
-        try:
-            if len(os.listdir("/TaskInbox"))>0:
-                return True
-            else:
-                return False
-        except:
-            False
+        print(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox"))
+        if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox"))>0:
+            print("There are missing jobs")
+            return True
+        else:
+            return False
+      
 
     def activate(self) -> None:
         """ Starts listening to available slave nodes, stablishing a communication with each of them. """
@@ -98,24 +99,40 @@ class MasterNode:
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         if flag == "Done":
-            with open('ResponseOutBox/jobs.list', 'rb') as fileLoad:
-                if len(os.listdir("/done"))>0:
+            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>0:
+                with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
+                        jobs = pickle.load(fileLoad)
+                        fileLoad.close()
+            else:
+                jobs = []
+        elif flag == "ToDo":  
+            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox"))>0: 
+                with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad:               
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
-                else:
-                    jobs = []
-        elif flag == "ToDo":   
-            with open('TaskInbox/jobs.list', 'rb') as fileLoad:
-                if len(os.listdir("/done"))>0:
-                    jobs = pickle.load(fileLoad)
-                    fileLoad.close()
-                else:
-                    jobs = []
+            else:
+                jobs = []
         print("Job loaded")
         return jobs
+
+    def delete_job(self,job_delete):
+        """Function to delete an specific job"""
+        jobs_save = []
+        #First loads all the jobs
+        jobs = self.load_jobs("ToDo")
+        for job in jobs:
+            if job.id == job_delete.id:
+                print("Job Equal")
+                pass
+            else:
+                jobs_save.append(job)
+        # Saves the jobs
+        with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
+            pickle.dump(jobs_save, fileSave)
+        
     def load_job_to_process(self):
         """ Function that loads a job, and deletes it from the list"""
-        jobs = self.load_jobs()
+        jobs = self.load_jobs("ToDo")
         # Gets the job to process
         job_to_process = jobs[0]
         # Deteletes the job
@@ -153,14 +170,18 @@ class MasterNode:
         client.sendall(payload) 
 
 
-    def slave_connection(self, slave_socket: socket.socket): 
+    def slave_connection(self, slave_socket: socket.socket,dummy): 
    
         while True:
             # Checks if there are jobs to do
             if self.check_missing_jobs():
                 # Loads the job
+                
                 job_to_do = self.load_job_to_process()
+                
                 # Sends the job
                 self.send_data(slave_socket,job_to_do)
                 #   Waits for the job to be done
                 job_done = self.recieve_data(slave_socket)
+                # Saves the job
+                self.save_job("Done")

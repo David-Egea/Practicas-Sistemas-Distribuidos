@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import pickle
 import numpy as np
-
+import random
 from numpy import true_divide
 from configuration import Configuration
 import time 
@@ -129,7 +129,7 @@ class ServiceServer:
                     fileLoad.close()
             else:
                 jobs = []
-        print("Job loaded")
+       
         return jobs
     
     def fragment_job(self,job):
@@ -152,8 +152,12 @@ class ServiceServer:
                 #adding the control variables
                 new_job.sequence = i
                 new_job.fragments = fragments
+                id = random.randint(0,1000)
+                new_job.id = id
                 jobs_fragmented.append(new_job)
         else:
+            id = random.randint(0,1000)
+            job.id = id
             jobs_fragmented.append(job)
 
         return jobs_fragmented
@@ -167,6 +171,7 @@ class ServiceServer:
             # Waits to recieve a job from the client
             job_to_do = self.recieve_data(client)
             jobs_fragmented = self.fragment_job(job_to_do)
+            print(len(jobs_fragmented))
             # Getting the client id
             client_id = job_to_do.client_id
             #The job is in the list to be done

@@ -12,3 +12,4 @@ class Job():
         self.payload = payload
         # Flag of done job is initialized to zero
         self.done = False
+        self.id = 0
