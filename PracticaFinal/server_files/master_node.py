@@ -105,7 +105,7 @@ class MasterNode:
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         if flag == "Done":
-            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>1:
+            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>0:
                 with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
