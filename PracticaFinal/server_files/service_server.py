@@ -67,8 +67,9 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open('ResponseOutBox/jobs.list', 'wb') as fileSave:
+            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
+                fileSave.close()
 
         elif flag == 'ToDo':
             #First jobs are loaded
@@ -78,8 +79,9 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open('TaskInbox/jobs.list', 'wb') as fileSave:
+            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
+                fileSave.close()
 
     def is_job_done(self,client_id):
         # TODO: adaptarlo a jobs fragmentados
@@ -105,9 +107,10 @@ class ServiceServer:
                     for job_join in jobs_return:
                         payload_joined.append(job_join.payload())
                     job_joined = Job(jobs_return[0].client_id,jobs_return[0].job_type,payload_joined)
-                    
+                    print("Job Found")
                     return True,job_joined
             else:
+                print("Job found")
                 return True,jobs_return[0]
         else:    
             return False
@@ -115,16 +118,20 @@ class ServiceServer:
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
+        jobs = []
         if flag == "Done":
-            if os.path.exists('ResponseOutBox/jobs.list'):
-                with open('ResponseOutBox/jobs.list', 'rb') as fileLoad:
-                    jobs = pickle.load(fileLoad)
-                    fileLoad.close()
+            if os.path.exists("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list"):
+                try:
+                    with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
+                        jobs = pickle.load(fileLoad)
+                        fileLoad.close()
+                except:
+                    pass
             else:
                 jobs = []
         elif flag == "ToDo":   
             if os.path.exists('TaskInbox/jobs.list'):
-                with open('TaskInbox/jobs.list', 'rb') as fileLoad: 
+                with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad: 
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
             else:
@@ -193,7 +200,7 @@ class ServiceServer:
                 print("Everything correct")
                 # Sending confirmation msg
                 conf_msg= "Ok"
-                self.sendData(client,conf_msg)
+                self.send_data(client,conf_msg)
             else:
                 print("There is an error with the node")
 
@@ -216,7 +223,6 @@ class ServiceServer:
                 recibidos += len(msg)
             buffer.seek(0)
             data = pickle.loads(buffer.read())
-            print(data)
         except:
             print("Error")
         time.sleep(0.1)

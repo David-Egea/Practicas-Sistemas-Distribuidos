@@ -13,3 +13,5 @@ class Job():
         # Flag of done job is initialized to zero
         self.done = False
         self.id = 0
+        self.fragments = 0
+        self.sequence = 0

@@ -72,7 +72,6 @@ class Client:
     def load_payload(self)->list:
         """Function to load all the payload to process"""
         print("Loading payload")
-        print(self.directoryToDo)
         listed_directory = os.listdir(self.directoryToDo)
         payload_process = []
         i  = 0
