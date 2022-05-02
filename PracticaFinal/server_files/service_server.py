@@ -159,7 +159,7 @@ class ServiceServer:
             id = random.randint(0,1000)
             job.id = id
             jobs_fragmented.append(job)
-
+        print("Jobs fragmented = {}".format(len(jobs_fragmented)))
         return jobs_fragmented
 
 
