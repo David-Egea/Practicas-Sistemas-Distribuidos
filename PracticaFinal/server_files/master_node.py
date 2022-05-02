@@ -105,6 +105,7 @@ class MasterNode:
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
+        jobs = []
         if flag == "Done":
             if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>0:
                 try:
