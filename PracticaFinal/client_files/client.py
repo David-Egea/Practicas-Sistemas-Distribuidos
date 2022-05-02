@@ -148,6 +148,9 @@ class Client:
             msg = self.recieve_data()
             if msg == "Ok":
                 print("Everything correct")
+                pass
+            else:
+                break
         print("Loop finished")
 
         

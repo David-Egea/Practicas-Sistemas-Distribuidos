@@ -1,5 +1,5 @@
 from typing import List
-from slave_files.task_modules.task_module import TaskModule
+from task_modules.task_module import TaskModule
 import numpy as np
 import cv2
 
@@ -16,7 +16,7 @@ class ImageTaskModule(TaskModule):
         """ Adds the passed image to the top of stack."""
         self._img_stack.append(image)
 
-    def load_images(self, images: List[np.ndarray]) -> None:
+    def load_images(self, images) -> None:
         """ Adds the images to the stack."""
         for img in images:
             # Adds the image to the stack

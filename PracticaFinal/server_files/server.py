@@ -45,5 +45,6 @@ if __name__ == "__main__":
         server = Server()
         server.start()
     except KeyboardInterrupt:
+        server.stop()
         print("Client finished")
 

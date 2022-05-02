@@ -4,6 +4,8 @@ import sys
 import traceback
 from pathlib import Path
 from multiprocessing import Process
+
+from zmq import EVENT_CLOSE_FAILED
 from configuration import Configuration
 import pickle
 import os
@@ -49,8 +51,12 @@ class MasterNode:
         """Function to check is there are any missing jobs to be done"""
         print(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox"))
         if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox"))>0:
-            print("There are missing jobs")
-            return True
+            jobs  = self.load_jobs("ToDo")
+            if len(jobs)>0:
+                print("There are missing jobs")
+                return True
+            else:
+                return False
         else:
             return False
       
@@ -81,7 +87,7 @@ class MasterNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open('ResponseOutBox/jobs.list', 'wb') as fileSave:
+            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
 
         elif flag == 'ToDo':
@@ -92,14 +98,14 @@ class MasterNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open('TaskInbox/jobs.list', 'wb') as fileSave:
+            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
 
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         if flag == "Done":
-            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>0:
+            if len(os.listdir("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox"))>1:
                 with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
@@ -184,4 +190,14 @@ class MasterNode:
                 #   Waits for the job to be done
                 job_done = self.recieve_data(slave_socket)
                 # Saves the job
-                self.save_job("Done")
+                self.save_job("Done",job_done)
+                # Sends the ok command
+                self.send_data(slave_socket,"Ok")
+                # Waits for the confirmation from the slave
+                conf_msg = self.recieve_data(slave_socket)
+                if conf_msg == "Ok":
+                    pass
+                else:
+                    print("There is an error with the slave")
+                    # TODO: Guardar el trabajo no realizado
+                    break

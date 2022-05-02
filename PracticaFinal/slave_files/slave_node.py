@@ -1,5 +1,6 @@
 import socket
 import pickle
+from task_modules.image_task_module import ImageTaskModule
 from job import Job
 from configuration import Configuration
 from pathlib import Path
@@ -40,8 +41,28 @@ class SlaveNode:
             # self._slave_socket.send(payload)
             
             # Receives a new job from server
-            new_job = self.recieve_data()
+            job_to_process = self.recieve_data()
             print("Job recieved")
+            if job_to_process.job_type == "process.image.color_to_gray":
+                task = ImageTaskModule()
+                # Loads the data to the task module
+                images = job_to_process.payload
+                task.load_images(images)
+                # Process the data
+                payload_processed = task.do_task()
+                # Loads the payload on the object to return
+                job_to_process.payload = payload_processed
+                job_to_process.done = True
+                # Returns the object
+                self.send_data(job_to_process)
+                 # waits for the confirmation of the msg
+                msg = self.recieve_data()
+                if msg == "Ok":
+                    self.send_data("Ok")
+                    print("Everything correct")
+                    pass
+                else:
+                    break
 
     def send_data(self,data):
     
