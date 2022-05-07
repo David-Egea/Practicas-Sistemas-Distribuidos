@@ -20,8 +20,9 @@ class ServiceServer:
 
             """
     def __init__(self):
-        
-        self.configuration = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\server_config.ini")
+        self.directory = str(os.path.abspath(os.getcwd()))
+
+        self.configuration = Configuration(self.directory+"\server_config.ini")
         self.ip_address = self.configuration.get_config_param('server',"ip")
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
@@ -67,7 +68,7 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
+            with open(self.directory+"\ResponseOutBox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
 
@@ -79,7 +80,7 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
+            with open(self.directory+"\TaskInbox\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
 
@@ -120,9 +121,9 @@ class ServiceServer:
         """Function to load all the payload to process"""
         jobs = []
         if flag == "Done":
-            if os.path.exists("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list"):
+            if os.path.exists(self.directory+"\ResponseOutBox\jobs.list"):
                 try:
-                    with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
+                    with open(self.directory+"\ResponseOutBox\jobs.list", 'rb') as fileLoad:
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
                 except:
@@ -131,7 +132,7 @@ class ServiceServer:
                 jobs = []
         elif flag == "ToDo":   
             if os.path.exists('TaskInbox/jobs.list'):
-                with open("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad: 
+                with open(self.directory+"\TaskInbox\jobs.list", 'rb') as fileLoad: 
                     jobs = pickle.load(fileLoad)
                     fileLoad.close()
             else:

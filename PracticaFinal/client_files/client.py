@@ -26,6 +26,7 @@ class Client:
         # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
         self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("client","directoryToSave")
+        print(self.directoryToDo)
         self.indexImage = 0
         # Elements to process on each job
         self.elements_load = int(self.configuration.get_config_param("client","elementsLoad"))
@@ -92,7 +93,6 @@ class Client:
         """Function to save the results of the processing"""
         for element in payload:
             # Writing the image
-            print(self.directoryToSave+"\\"+str(self.indexImage)+".jpg")
             cv2.imwrite(self.directoryToSave+"\\"+str(self.indexImage)+".jpg",element)
             # Incrementing the index by one
             self.indexImage = self.indexImage+1
