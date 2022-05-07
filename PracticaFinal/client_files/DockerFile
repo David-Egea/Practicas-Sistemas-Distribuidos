@@ -7,9 +7,7 @@ RUN sudo apt update -y
 FROM python:3
 
 
-
-COPY requirements.txt requirements.txt
-COPY Node.py Node.py 
-COPY config.ini config.ini 
+WORKDIR /src
+COPY ..
 RUN pip3 install -r requirements.txt
-CMD [ "python", "./Node.py" ]
+CMD [ "python", "./client.py" ]
