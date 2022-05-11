@@ -14,7 +14,7 @@ class Client:
     """ TCP Client class """
     
     def __init__(self) -> None:
-        self.configuration = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\client_files\\client_config.ini")
+        self.configuration = Configuration("client_config.ini")
         self.ip_address_server = self.configuration.get_config_param("network","ip_server")
         self.port_server = int(self.configuration.get_config_param("network","port_server"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
