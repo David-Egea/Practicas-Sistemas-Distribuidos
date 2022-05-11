@@ -5,7 +5,7 @@ RUN apt-get update
 RUN apt install sudo -y
 RUN sudo apt update -y
 RUN sudo apt install python3-pip -y
-RUN pip3 install opencv-python-headless
+
 
 
 
@@ -23,4 +23,5 @@ RUN mkdir -p /filesDone
 
 
 RUN pip3 install -r requirements.txt
+CMD [ "pip3 install opencv-python-headless" ]
 CMD [ "python", "./client.py" ]
