@@ -18,10 +18,11 @@ COPY configuration.py configuration.py
 COPY client_config.ini client_config.ini
 COPY requirements.txt requirements.txt
 COPY job.py job.py
-COPY /filesToDo /filesToDo
+RUN mkdir -p /filesToDo
+COPY /filesToDo/ /filesToDo/
 RUN mkdir -p /filesDone
 
 
 RUN pip3 install -r requirements.txt
 CMD [ "pip3 install opencv-python-headless" ]
-CMD [ "python", "./client.py" ]
+CMD [ "python3", "./client.py" ]
