@@ -9,5 +9,9 @@ FROM python:3
 
 WORKDIR /src
 COPY client.py client.py
+COPY job.py job.py
+COPY /filesToDo /filesToDo
+
+
 RUN pip3 install -r requirements.txt
 CMD [ "python", "./client.py" ]
