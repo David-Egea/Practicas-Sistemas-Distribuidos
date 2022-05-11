@@ -10,4 +10,4 @@ FROM python:3
 WORKDIR /src
 COPY ..
 RUN pip3 install -r requirements.txt
-CMD [ "python", "./client.py" ]
+CMD [ "python3", "./client.py" ]
