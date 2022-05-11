@@ -13,17 +13,13 @@ RUN apt-get update && apt-get install -y \
     unzip \ 
     pkg-config \
     libopencv-dev \ 
-    libav-tools  \ 
     libjpeg-dev \ 
     libpng-dev \ 
     libtiff-dev \ 
-    libjasper-dev \ 
     libgtk2.0-dev \ 
     libatlas-base-dev \
     gfortran \
     webp \ 
-    qt5-default \
-    libvtk6-dev \ 
     zlib1g-dev 
 
 # Install Open CV - Warning, this takes absolutely forever
