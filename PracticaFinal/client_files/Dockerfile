@@ -3,6 +3,8 @@ FROM ubuntu:latest
 RUN apt update
 RUN apt install sudo -y
 RUN sudo apt update -y
+RUN sudo apt install python3-pip -y
+
 
 FROM python:3
 
