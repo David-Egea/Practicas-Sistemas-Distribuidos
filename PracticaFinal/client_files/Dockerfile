@@ -6,6 +6,8 @@ RUN apt install sudo -y
 RUN sudo apt update -y
 RUN sudo apt install python3-pip -y
 RUN apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get install libgl1
+RUN apt install -y libgl1-mesa-glx
 
 
 FROM python:3
