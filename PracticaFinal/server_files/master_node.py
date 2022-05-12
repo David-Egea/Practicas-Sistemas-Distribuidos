@@ -22,7 +22,7 @@ class MasterNode:
         self.directory = str(os.path.abspath(os.getcwd()))
         self._slave_nodes_regist = {}
         # Creates a configuration class
-        self._config = Configuration(self.directory+"\server_config.ini")
+        self._config = Configuration("server_config.ini")
         # Master node configuration
         self._master_ip = str(self._config.get_config_param("master","ip"))
         self._master_port = int(self._config.get_config_param("master","port_external"))

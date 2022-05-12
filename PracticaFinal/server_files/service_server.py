@@ -22,7 +22,7 @@ class ServiceServer:
     def __init__(self):
         self.directory = str(os.path.abspath(os.getcwd()))
 
-        self.configuration = Configuration(self.directory+"\server_config.ini")
+        self.configuration = Configuration("server_config.ini")
         self.ip_address = self.configuration.get_config_param('server',"ip")
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
