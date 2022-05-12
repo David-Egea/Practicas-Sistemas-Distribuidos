@@ -19,7 +19,9 @@ COPY client_config.ini client_config.ini
 COPY requirements.txt requirements.txt
 COPY job.py job.py
 RUN mkdir -p /filesToDo
-COPY /filesToDo/ /filesToDo/
+COPY /filesToDo/cat_0018.jpg /filesToDo/cat_0018.jpg
+COPY /filesToDo/cat_0019.jpg /filesToDo/cat_0019.jpg
+COPY /filesToDo/cat_0020.jpg /filesToDo/cat_0020.jpg
 RUN mkdir -p /filesDone
 
 
