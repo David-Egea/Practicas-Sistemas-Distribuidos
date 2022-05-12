@@ -1,10 +1,11 @@
 import json
 import hashlib
+from typing import List
 
 class Block():
     """ Blockchain element class."""
     
-    def __init__(self, index, transactions, timestamp, previous_hash):
+    def __init__(self, index: int, transactions: List[str], timestamp: float, previous_hash: str):
         """
         Constructor for a 'Block' class.
         * param index: The unique ID number if a block.
