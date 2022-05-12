@@ -27,4 +27,4 @@ RUN mkdir -p /filesDone
 
 RUN pip3 install -r requirements.txt
 RUN pip3 install opencv-python-headless
-CMD [ "python3", "./client.py" ]
+CMD [ "python", "./client.py" ]
