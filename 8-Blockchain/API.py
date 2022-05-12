@@ -55,7 +55,7 @@ def mine():
 
 @app.route("/pending_transactions",methods = ["GET"])
 def get_pending_transactions():
-    return str(blockchain.unconfirmed_transactions)
+    return (str(blockchain.unconfirmed_transactions),200)
 
 @app.route("/register_new_node",methods = ["POST"])
 def register_new_node():
@@ -73,29 +73,37 @@ def register_new_node():
 
 @app.route("/register_with_existing_node",methods = ["POST"])
 def register_existing_node():
-    # Retrieving data
-    data_recieved = request.get_json()
-    node_address = data_recieved["node_address"]
-    
-    url = "http://127.0.0.1:6000/register_new_node"
+    node_address = request.get_json()["node_address"]
+    # Constructs a POST request to register_new_node endpoint
+    url = f"{request.host_url}/register_new_node"
     payload = json.dumps({
     "new_node_address": node_address
     })
     headers = {
     'Content-Type': 'application/json'
     }
-    responseAPI = requests.request("POST", url, headers=headers, data=payload)
-    responseAPI.json()
-    # Creating the response
-    response = dict()
-    # Setting the length
-    response["length"] = responseAPI["length"]
-    # Setting the peers
-    response["peers"] = responseAPI["peers"]
-    chain_to_proccess = responseAPI["chain"]
-    for block_dict in chain_to_proccess:
-        block = Block(int(block_dict["index"]),block_dict["transactions"],float(block_dict["timestamp"]),block_dict["previous_hash"])
-        block.nonce = int(block_dict["nonce"])
-        block.current_hash = block_dict["current_hash"]
-        blockchain.append_block(block,block_dict["current_hash"])
+    # Sends the request and returns the answer
+    response = requests.request("POST", url, headers=headers, data=payload)
+    # Depending on the status code of response
+    if response.status_code == 200:
+        # Updates chain and peers
+        chain_dumps = response.json()["chain"]
+        peers_dumps = response.json()["peers"]
+        # Instantiates a Blockchain obj based on chain received
+        blockchain = Blockchain()
+        # Setting the peers
+        for block_dumps in chain_dumps:
+            block = Block(int(block_dumps["index"]),block_dumps["transactions"],float(block_dumps["timestamp"]),block_dumps["previous_hash"])
+            block.nonce = int(block_dumps["nonce"])
+            block.current_hash = block_dumps["current_hash"]
+            was_added = blockchain.append_block(block,block_dumps["current_hash"])
+            if not was_added:
+                # The validation failed
+                return ("Validation  of chain failed", 400)
+        # The completition of new bockchain was succesful
+        peers = peers_dumps
+        return ("Registration successful", 200)
+    else:
+        # The post request failed
+        return response.content, response.status_code
 
