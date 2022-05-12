@@ -20,7 +20,7 @@ class SlaveNode:
     def __init__(self) -> None:
         self.directory = str(os.path.abspath(os.getcwd()))
         # Creates a configuration class to read/write config file
-        self._configuration = Configuration(self.directory+"\slave_config.ini") # TODO: Al levantarlo en un docker se deberia cambiar el path
+        self._configuration = Configuration("slave_config.ini") # TODO: Al levantarlo en un docker se deberia cambiar el path
         self._master_ip = self._configuration.get_config_param("Master","ip") # Node ip address
         self._master_port = int(self._configuration.get_config_param("Master","port")) # Node port 
         self._slave_buffer_size = int(self._configuration.get_config_param("Slave","buffer_size")) # Buffer size
