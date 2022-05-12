@@ -9,15 +9,18 @@ RUN sudo apt install python3-pip -y
 FROM python:3
 
 WORKDIR /src
-COPY client.py client.py
+COPY master_node.py master_node.py
+COPY server.py server.py
 COPY configuration.py configuration.py
-COPY client_config.ini client_config.ini
-COPY requirements.txt requirements.txt
+COPY service_server.py service_server.py
+COPY server_config.ini server_config.ini
 COPY job.py job.py
-RUN mkdir -p /filesToDo
-COPY /filesToDo/ /filesToDo/
-RUN mkdir -p /filesDone
+
+RUN mkdir -p /TaskInbox
+RUN mkdir -p /ResponseOutBox
+COPY /TaskInbox/jobs.list /TaskInbox/jobs.list
+COPY /ResponseOutBox/jobs.list /ResponseOutBox/jobs.list
 
 RUN pip3 install -r requirements.txt
 CMD [ "pip3 install opencv-python-headless" ]
-CMD [ "python", "./client.py" ]
+CMD [ "python", "./server.py" ]
