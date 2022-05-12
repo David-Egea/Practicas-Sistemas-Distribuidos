@@ -14,6 +14,7 @@ COPY server.py server.py
 COPY configuration.py configuration.py
 COPY service_server.py service_server.py
 COPY server_config.ini server_config.ini
+COPY requirements.txt requirements.txt
 COPY job.py job.py
 
 RUN mkdir -p /TaskInbox
