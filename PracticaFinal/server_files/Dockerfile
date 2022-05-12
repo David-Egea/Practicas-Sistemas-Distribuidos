@@ -17,10 +17,10 @@ COPY server_config.ini server_config.ini
 COPY requirements.txt requirements.txt
 COPY job.py job.py
 
-RUN mkdir -p /TaskInbox
-RUN mkdir -p /ResponseOutBox
-COPY /TaskInbox/jobs.list /TaskInbox/jobs.list
-COPY /ResponseOutBox/jobs.list /ResponseOutBox/jobs.list
+RUN mkdir -p /src/TaskInbox
+RUN mkdir -p /src/ResponseOutBox
+COPY /TaskInbox/jobs.list /src/TaskInbox/jobs.list
+COPY /ResponseOutBox/jobs.list /src/ResponseOutBox/jobs.list
 
 RUN pip3 install -r requirements.txt
 RUN pip3 install opencv-python-headless
