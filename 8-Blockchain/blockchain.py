@@ -86,3 +86,24 @@ class Blockchain():
             return new_index
         else:
             return 0
+
+    def checkChain(self,chain:List)->bool:
+        for i in range(len(chain)-1,0,-1):
+            #Getting the block
+            block = chain[i]
+            #Getting the hash
+            hash = block.current_hash
+            delattr(block,'current_hash')
+            #Checking that the block is correct
+            if self.is_valid_proof(block,hash) and hash == block.compute_hash():
+                #Checking the previous hash
+                previous_hash = block.previous_hash
+                previous_block = chain[i-1]
+                if previous_block.current_hash == previous_hash:
+                    #Everything is correct
+                    block.current_hash = hash
+                else:
+                    return False
+            else:
+                return False
+        return True
