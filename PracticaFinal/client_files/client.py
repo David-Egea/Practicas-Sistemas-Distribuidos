@@ -78,7 +78,7 @@ class Client:
         i  = 0
         for element in listed_directory:
             if i< self.elements_load:
-                image= cv2.imread(self.directoryToDo+"\\"+element)
+                image= cv2.imread(self.directoryToDo+element)
                 i=i+1
                 payload_process.append(image)
                 #The image is deleted
@@ -93,7 +93,7 @@ class Client:
         """Function to save the results of the processing"""
         for element in payload:
             # Writing the image
-            cv2.imwrite(self.directoryToSave+"\\"+str(self.indexImage)+".jpg",element)
+            cv2.imwrite(self.directoryToSave+str(self.indexImage)+".jpg",element)
             # Incrementing the index by one
             self.indexImage = self.indexImage+1
 
