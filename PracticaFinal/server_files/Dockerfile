@@ -23,4 +23,4 @@ COPY /TaskInbox/jobs.list /TaskInbox/jobs.list
 COPY /ResponseOutBox/jobs.list /ResponseOutBox/jobs.list
 
 RUN pip3 install -r requirements.txt
-CMD [ "pip3 install opencv-python-headless" ]
+CMD [ "python", "./server.py" ]
