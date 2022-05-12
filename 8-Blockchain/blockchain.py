@@ -59,7 +59,7 @@ class Blockchain():
         else:
             return False
 
-    def add_new_transaction(self,transaction) -> None:
+    def add_new_transaction(self, transaction: str) -> None:
         """"Adds a new transaction to the unconfirmed transactions list."""
         # Adds the new transaction
         self.unconfirmed_transactions.append(transaction)
@@ -87,20 +87,20 @@ class Blockchain():
         else:
             return 0
 
-    def checkChain(self,chain:List)->bool:
+    def check_chain(self, chain) -> bool:
         for i in range(len(chain)-1,0,-1):
-            #Getting the block
+            # Getting the block
             block = chain[i]
-            #Getting the hash
+            # Getting the hash
             hash = block.current_hash
             delattr(block,'current_hash')
-            #Checking that the block is correct
+            # Checking that the block is correct
             if self.is_valid_proof(block,hash) and hash == block.compute_hash():
-                #Checking the previous hash
+                # Checking the previous hash
                 previous_hash = block.previous_hash
                 previous_block = chain[i-1]
                 if previous_block.current_hash == previous_hash:
-                    #Everything is correct
+                    # Everything is correct
                     block.current_hash = hash
                 else:
                     return False

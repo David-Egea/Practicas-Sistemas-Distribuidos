@@ -8,12 +8,12 @@ from block import Block
 
 app = Flask(__name__)
 
-blockchain = Blockchain()
+blockchain = Blockchain(difficulty=3)
 
 peers = set()
 
 @app.route("/new_transaction",methods = ["POST"])
-def newTransaction():
+def new_transaction():
     # Retrieving data
     data_recieved = request.get_json()
     minimum_fields = ["author","content"]
@@ -29,7 +29,7 @@ def newTransaction():
         return "Invalid transaction",404
 
 @app.route("/chain",methods = ["GET"])
-def getChain():
+def get_chain():
     # Creating the response
     response = dict()
     # Setting the length
@@ -58,7 +58,7 @@ def get_pending_transactions():
     return str(blockchain.unconfirmed_transactions)
 
 @app.route("/register_new_node",methods = ["POST"])
-def registerNewNode():
+def register_new_node():
     # Retrieving data
     data_recieved = request.get_json()
     minimum_fields = ["new_node_address"]
@@ -67,12 +67,12 @@ def registerNewNode():
     if minimum_fields[0] in keys :
         # Adding the node
         peers.add(data_recieved["new_node_address"])
-        return getChain()
+        return get_chain()
     else:
         return "Invalid transaction",404
 
 @app.route("/register_with_existing_node",methods = ["POST"])
-def registerExistingNode():
+def register_existing_node():
     # Retrieving data
     data_recieved = request.get_json()
     node_address = data_recieved["node_address"]
@@ -98,5 +98,4 @@ def registerExistingNode():
         block.nonce = int(block_dict["nonce"])
         block.current_hash = block_dict["current_hash"]
         blockchain.append_block(block,block_dict["current_hash"])
-    a = 2
 
