@@ -10,12 +10,14 @@ RUN sudo apt install python3-pip -y
 
 
 FROM python:3
+
+
+
+WORKDIR /src
 RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
 RUN chmod 0777 /src
 USER docker
 
-
-WORKDIR /src
 COPY client.py client.py
 COPY configuration.py configuration.py
 COPY client_config.ini client_config.ini
