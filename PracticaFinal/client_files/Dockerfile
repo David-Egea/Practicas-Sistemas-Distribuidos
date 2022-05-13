@@ -18,11 +18,11 @@ COPY configuration.py configuration.py
 COPY client_config.ini client_config.ini
 COPY requirements.txt requirements.txt
 COPY job.py job.py
-RUN mkdir -p /src/filesToDo
-COPY /filesToDo/cat_0018.jpg /src/filesToDo/cat_0018.jpg
-COPY /filesToDo/cat_0019.jpg /src/filesToDo/cat_0019.jpg
-COPY /filesToDo/cat_0020.jpg /src/filesToDo/cat_0020.jpg
-RUN mkdir -p /src/filesDone
+RUN mkdir -p /src/files/filesToDo
+COPY /files/filesToDo/cat_0018.jpg /src/files/filesToDo/cat_0018.jpg
+COPY /files/filesToDo/cat_0019.jpg /src/files/filesToDo/cat_0019.jpg
+COPY /files/filesToDo/cat_0020.jpg /src/files/filesToDo/cat_0020.jpg
+RUN mkdir -p /src/files/filesDone
 
 
 RUN pip3 install -r requirements.txt
