@@ -9,7 +9,7 @@ FTP_PASSWORD = 'contraseña1'
 FTP_DIRECTORY = '/home/user1/ftpfiles'
 
 
-def main():
+def ftserver():
     authorizer = DummyAuthorizer()
     authorizer.add_user(FTP_USER, FTP_PASSWORD, FTP_DIRECTORY, perm='elr')
 

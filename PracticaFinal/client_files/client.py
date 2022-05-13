@@ -8,7 +8,10 @@ from job import Job
 import random
 import os
 from pathlib import Path
-
+from threading import Thread
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
 
 class Client:
     """ TCP Client class """
@@ -20,6 +23,10 @@ class Client:
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
         self.id = random.randint(1,1000)
         self.job_type = "process.image.color_to_gray"
+        self.ftp_user = self.configuration.get_config_param("ftp","username")
+        self.ftp_password = self.configuration.get_config_param("ftp","password")
+        self.ftp_directory = str(Path().absolute())+self.configuration.get_config_param("ftp","ftpDirectory")
+        self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Calculating the ip
         self.get_ip()
 
@@ -38,6 +45,8 @@ class Client:
         self.socket_client.connect(self.server_address)
         
         self.main()
+        # Creating the ftp server thread
+        self.ftp_thread = Thread(target = self.ftpserver).start()
         # Waiting for the thread to finish
        
         print("Client finished")
@@ -82,7 +91,7 @@ class Client:
                 i=i+1
                 payload_process.append(image)
                 #The image is deleted
-                #os.remove(self.directoryToDo+"\\"+element)
+                os.remove(self.directoryToDo+"\\"+element)
                 
             else:
                 break
@@ -128,7 +137,25 @@ class Client:
     
         payload = pickle.dumps(data)
         n_bytes = self.socket_client.send(str(len(payload)).encode() + b"\r")
-        self.socket_client.sendall(payload) 
+        self.socket_client.sendall(payload)
+    
+    def ftserver(self):
+        authorizer = DummyAuthorizer()
+        authorizer.add_user(self.ftp_user, self.ftp_password, self.ftp_directory, perm='elr')
+
+        handler = FTPHandler
+        handler.authorizer = authorizer
+        handler.banner = 'Servidor FTP Listo'
+        handler.passive_ports = range(60000, 65535)
+
+        address = ('', self.ftp_port)
+        server = FTPServer(address, handler)
+
+        server.max_cons = 256
+        server.max_cons_per_ip = 5
+
+        server.serve_forever()
+
 
     def main(self):
         """Main thread for the application"""
