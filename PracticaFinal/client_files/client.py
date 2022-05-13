@@ -28,7 +28,7 @@ class Client:
         self.ftp_directory = str(Path().absolute())+self.configuration.get_config_param("ftp","ftpDirectory")
         self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Calculating the ip
-        self.ip  = self.get_ip()
+        self.get_ip()
         
         # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
@@ -45,6 +45,7 @@ class Client:
         self.socket_client.connect(self.server_address)
         
         self.main()
+        
         
         # Creating the ftp server thread
         self.ftp_thread = Thread(target = self.ftp_server).start()
@@ -149,6 +150,7 @@ class Client:
         handler.banner = 'Servidor FTP Listo'
         handler.passive_ports = range(60000, 65535)
 
+        print("Ip: {}".format(self.ip))
         address = (self.ip, self.ftp_port)
         server = FTPServer(address, handler)
 
