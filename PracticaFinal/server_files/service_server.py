@@ -132,9 +132,12 @@ class ServiceServer:
                 jobs = []
         elif flag == "ToDo":   
             if os.path.exists('TaskInbox/jobs.list'):
-                with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad: 
-                    jobs = pickle.load(fileLoad)
-                    fileLoad.close()
+                try:
+                    with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad: 
+                        jobs = pickle.load(fileLoad)
+                        fileLoad.close()
+                except: 
+                    pass
             else:
                 jobs = []
        

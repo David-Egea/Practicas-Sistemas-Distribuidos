@@ -29,6 +29,8 @@ class Client:
         self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Calculating the ip
         self.get_ip()
+        # Creating the ftp server thread
+        Thread(target = self.ftp_server).start()
         
         # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
@@ -47,8 +49,7 @@ class Client:
         self.main()
         
         
-        # Creating the ftp server thread
-        self.ftp_thread = Thread(target = self.ftp_server).start()
+        
         # Waiting for the thread to finish
        
         print("Client finished")
