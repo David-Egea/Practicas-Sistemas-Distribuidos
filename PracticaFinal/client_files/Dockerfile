@@ -11,7 +11,7 @@ RUN sudo apt install python3-pip -y
 
 FROM python:3
 RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-RUN chmod 0777 /usr/local/docker/foo
+RUN chmod 0777 /src
 USER docker
 
 
