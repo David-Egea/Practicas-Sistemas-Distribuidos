@@ -91,7 +91,7 @@ class Client:
                 i=i+1
                 payload_process.append(image)
                 #The image is deleted
-                os.remove(self.directoryToDo+"\\"+element)
+                os.remove(self.directoryToDo+"/"+element)
                 
             else:
                 break
