@@ -28,7 +28,7 @@ class Client:
         self.ftp_directory = str(Path().absolute())+self.configuration.get_config_param("ftp","ftpDirectory")
         self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Calculating the ip
-        self.get_ip()
+        self.ip  = self.get_ip()
         
         # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
@@ -149,7 +149,7 @@ class Client:
         handler.banner = 'Servidor FTP Listo'
         handler.passive_ports = range(60000, 65535)
 
-        address = ('', self.ftp_port)
+        address = (self.ip, self.ftp_port)
         server = FTPServer(address, handler)
 
         server.max_cons = 256
