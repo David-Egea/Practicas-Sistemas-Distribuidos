@@ -29,11 +29,11 @@ class Client:
         self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Calculating the ip
         self.get_ip()
-
+        """
         # Variables to load data and save it
         self.directoryToDo = str(Path().absolute())+self.configuration.get_config_param("client","directoryToDo")
         self.directoryToSave = str(Path().absolute())+self.configuration.get_config_param("client","directoryToSave")
-        print(os.listdir("/src"))
+       
         self.indexImage = 0
         # Elements to process on each job
         self.elements_load = int(self.configuration.get_config_param("client","elementsLoad"))
@@ -45,8 +45,9 @@ class Client:
         self.socket_client.connect(self.server_address)
         
         self.main()
+        """
         # Creating the ftp server thread
-        self.ftp_thread = Thread(target = self.ftpserver).start()
+        self.ftp_thread = Thread(target = self.ftp_server).start()
         # Waiting for the thread to finish
        
         print("Client finished")
@@ -139,7 +140,7 @@ class Client:
         n_bytes = self.socket_client.send(str(len(payload)).encode() + b"\r")
         self.socket_client.sendall(payload)
     
-    def ftserver(self):
+    def ftp_server(self):
         authorizer = DummyAuthorizer()
         authorizer.add_user(self.ftp_user, self.ftp_password, self.ftp_directory, perm='elr')
 
