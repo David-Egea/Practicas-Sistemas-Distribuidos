@@ -10,6 +10,9 @@ RUN sudo apt install python3-pip -y
 
 
 FROM python:3
+RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+
+USER docker
 
 
 WORKDIR /src
@@ -27,4 +30,4 @@ RUN mkdir -p /src/files/filesDone
 
 RUN pip3 install -r requirements.txt
 RUN pip3 install opencv-python-headless
-CMD [ "sudo python", "./client.py" ]
+CMD [ "python", "./client.py" ]
