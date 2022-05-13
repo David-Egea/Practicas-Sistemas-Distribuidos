@@ -1,23 +1,26 @@
 import time
+
+from numpy import diff
 from block import Block
 
-class Blockchain():
+class Blockchain(object):
     """ Blockchain class."""
     
-    def __init__(self, difficulty: int = 2) -> None:
+    def __init__(self, difficulty: int = 2, genesis_block: Block = None) -> None:
         # transacciones que no se han do todavía
         self.unconfirmed_transactions = []
         self.chain = []
         # Se crea el primer bloque
-        self.create_genesisBlock()
+        self.create_genesisBlock(genesis_block)
         # Se asigna la dificultad
-        self.difficulty = difficulty
+        self._difficulty = difficulty
 
-    def create_genesisBlock(self):
+    def create_genesisBlock(self, genesis_block: Block = None):
         # Se crea el objeto génesis
-        genesis_block = Block(0,[],time.time(),"0")
-        # Se le asigna el hash
-        genesis_block.current_hash = genesis_block.compute_hash()
+        if genesis_block is None:
+            genesis_block = Block(0,[],time.time(),"0")
+            # Se le asigna el hash
+            genesis_block.current_hash = genesis_block.compute_hash()
         # Se añade a la cadena
         self.chain.append(genesis_block)
     
@@ -25,6 +28,15 @@ class Blockchain():
     def last_block(self) -> Block:
         # Returns the last block
         return self.chain[-1]
+
+    @property
+    def difficulty(self) -> int:
+        return self._difficulty
+
+    @difficulty.setter
+    def difficulty(self, difficulty: int) -> None:
+        # Returns the last block
+        self._difficulty = difficulty
 
     def proof_of_work(self, block: Block) -> str:
         """ 
@@ -34,7 +46,7 @@ class Blockchain():
         # Calculates the initial hash
         calculated_hash  = block.compute_hash()
         # A loop is forced until the condition is met
-        while not calculated_hash[:self.difficulty].count("0") == self.difficulty:
+        while not calculated_hash[:self._difficulty].count("0") == self._difficulty:
             # Increases the nonce value of block
             block.nonce = block.nonce + 1
             # Computes the hash of the block with the nonce value updated
@@ -43,7 +55,7 @@ class Blockchain():
 
     def is_valid_proof(self, block: Block, hash: str) -> bool:
         """ Checks whether the given hash mets the conditions and is eq."""
-        return block.compute_hash() == hash and hash[:self.difficulty].count("0") == self.difficulty
+        return block.compute_hash() == hash and hash[:self._difficulty].count("0") == self._difficulty
 
     def append_block(self, block: Block, hash: str) -> bool:
         """ Tries to append the given block to the blockchain, checks whether the valid proof is valid and """
