@@ -114,13 +114,16 @@ class MasterNode:
             else:
                 jobs = []
         elif flag == "ToDo":  
-            if len(os.listdir(self.directory+"/TaskInbox"))>0: 
-                try:
-                    with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad:               
-                        jobs = pickle.load(fileLoad)
-                        fileLoad.close()
-                except:
-                    pass
+            if len(os.listdir(self.directory+"/TaskInbox"))>0:
+                while True:
+                    try:
+                        with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad:               
+                            jobs = pickle.load(fileLoad)
+                            fileLoad.close()
+                        break
+                    except:
+                        # If there is a fail it loops back
+                        pass
             else:
                 jobs = []
         return jobs
@@ -137,6 +140,7 @@ class MasterNode:
             else:
                 jobs_save.append(job)
         # Saves the jobs
+        os.remove(self.directory+"/TaskInbox/jobs.list")
         with open(self.directory+"/TaskInbox/jobs.list", 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
         

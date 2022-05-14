@@ -49,15 +49,17 @@ class SlaveNode:
                 task = ImageTaskModule()
                 # Loads the data to the task module
                 images = job_to_process.payload
+                print(len(images))
                 task.load_images(images)
                 # Process the data
+               
                 payload_processed = task.do_task()
                 # Loads the payload on the object to return
                 job_to_process.payload = payload_processed
                 job_to_process.done = True
                 # Returns the object
                 self.send_data(job_to_process)
-                 # waits for the confirmation of the msg
+                # waits for the confirmation of the msg
                 msg = self.recieve_data()
                 if msg == "Ok":
                     self.send_data("Ok")
@@ -65,6 +67,8 @@ class SlaveNode:
                     pass
                 else:
                     break
+                
+                
 
     def send_data(self,data):
     
