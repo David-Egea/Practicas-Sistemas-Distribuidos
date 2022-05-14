@@ -109,12 +109,31 @@ class ServiceServer:
                         payload_joined.append(job_join.payload())
                     job_joined = Job(jobs_return[0].client_id,jobs_return[0].job_type,payload_joined)
                     print("Job Found")
+                    self.delete_job(jobs_return)
+
                     return True,job_joined
             else:
                 print("Job found")
                 return True,jobs_return[0]
         else:    
             return False
+    def delete_job(self,jobs_delete):
+        """Function to delete an specific job"""
+        jobs_save = []
+        #First loads all the jobs
+        jobs = self.load_jobs("Done")
+        for job in jobs:
+            for job_delete in jobs_delete:
+                if job.id == job_delete.id:
+                    print("Job Equal")
+                    pass
+                else:
+                    jobs_save.append(job)
+        # Saves the jobs
+        os.remove(self.directory+"/ResponseOutBox/jobs.list")
+        with open(self.directory+"/ResponseOutBox/jobs.list", 'wb') as fileSave:
+            pickle.dump(jobs_save, fileSave)
+        print("jobs.list saved")
 
     def load_jobs(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
