@@ -156,7 +156,7 @@ class MasterNode:
 
             return job_to_process
         else:
-            return []
+            return 0
 
     def recieve_data(self,client):
         try:
@@ -195,7 +195,7 @@ class MasterNode:
                 # Loads the job
                 
                 job_to_do = self.load_job_to_process()
-                if len(job_to_do)>0:
+                if job_to_do !=0:
                     # Sends the job
                     self.send_data(slave_socket,job_to_do)
                     #   Waits for the job to be done
