@@ -98,7 +98,7 @@ class Client:
                 
             else:
                 break
-        print("Payload loaded")
+        print("Payload loaded {} elements".format(len(payload_process)))
         return payload_process
 
     def save_payload(self,payload):
