@@ -177,11 +177,9 @@ class Client:
                 self.send_data(conf_msg)
                 # waits for the confirmation of the msg
                 msg = self.recieve_data()
-                if msg == "Ok":
-                    print("Everything correct")
-                    pass
-                else:
-                    break
+                while msg != "Ok":
+                    msg = self.recieve_data()
+                
             print("Loop finished")
 
         
