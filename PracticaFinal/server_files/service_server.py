@@ -22,7 +22,7 @@ class ServiceServer:
     def __init__(self):
         self.directory = str(os.path.abspath(os.getcwd()))
 
-        self.configuration = Configuration("server_config.ini")
+        self.configuration = Configuration(self.directory +"\\server_files\\server_config.ini")
         self.ip_address = self.configuration.get_config_param('server',"ip")
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
@@ -68,7 +68,7 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open(self.directory+"/ResponseOutBox/jobs.list", 'wb') as fileSave:
+            with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
 
@@ -80,7 +80,7 @@ class ServiceServer:
             jobs.append(job)
 
             #Jobs are saved
-            with open(self.directory+"/TaskInbox/jobs.list", 'wb') as fileSave:
+            with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
 
@@ -130,8 +130,8 @@ class ServiceServer:
                 else:
                     jobs_save.append(job)
         # Saves the jobs
-        os.remove(self.directory+"/ResponseOutBox/jobs.list")
-        with open(self.directory+"/ResponseOutBox/jobs.list", 'wb') as fileSave:
+        os.remove(self.directory+"\\server_files\\ResponseOutBox\\jobs.list")
+        with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
         print("jobs.list saved")
 
@@ -140,9 +140,9 @@ class ServiceServer:
         """Function to load all the payload to process"""
         jobs = []
         if flag == "Done":
-            if os.path.exists(self.directory+"/ResponseOutBox/jobs.list"):
+            if os.path.exists(self.directory+"\\server_files\\ResponseOutBox\\jobs.list"):
                 try:
-                    with open(self.directory+"/ResponseOutBox/jobs.list", 'rb') as fileLoad:
+                    with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
                 except:
@@ -150,9 +150,9 @@ class ServiceServer:
             else:
                 jobs = []
         elif flag == "ToDo":   
-            if os.path.exists('TaskInbox/jobs.list'):
+            if os.path.exists('\\server_files\\TaskInbox\\jobs.list'):
                 try:
-                    with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad: 
+                    with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad: 
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
                 except: 

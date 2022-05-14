@@ -22,7 +22,7 @@ class MasterNode:
         self.directory = str(os.path.abspath(os.getcwd()))
         self._slave_nodes_regist = {}
         # Creates a configuration class
-        self._config = Configuration("server_config.ini")
+        self._config = Configuration(self.directory +"\\server_files\\server_config.ini")
         # Master node configuration
         self._master_ip = str(self._config.get_config_param("master","ip"))
         self._master_port = int(self._config.get_config_param("master","port_external"))
@@ -46,7 +46,7 @@ class MasterNode:
 
     def check_missing_jobs(self):
         """Function to check is there are any missing jobs to be done"""
-        if len(os.listdir(self.directory+"/TaskInbox"))>0:
+        if len(os.listdir(self.directory+"\\server_files\\TaskInbox"))>0:
             jobs  = self.load_jobs("ToDo")
             if len(jobs)>0:
                 print("There are missing jobs")
@@ -83,7 +83,7 @@ class MasterNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open(self.directory+"/ResponseOutBox/jobs.list", 'wb') as fileSave:
+            with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
             fileSave.close()
 
@@ -95,7 +95,7 @@ class MasterNode:
             jobs.append(job)
 
             #Jobs are saved
-            with open(self.directory+"/TaskInbox", 'wb') as fileSave:
+            with open(self.directory+"\\server_files\\TaskInbox", 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
             fileSave.close()
 
@@ -104,9 +104,9 @@ class MasterNode:
         """Function to load all the payload to process"""
         jobs = []
         if flag == "Done":
-            if len(os.listdir(self.directory+"/ResponseOutBox"))>0:
+            if len(os.listdir(self.directory+"\\server_files\\ResponseOutBox"))>0:
                 try:
-                    with open(self.directory+"/ResponseOutBox/jobs.list", 'rb') as fileLoad:
+                    with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
                             jobs = pickle.load(fileLoad)
                             fileLoad.close()
                 except:
@@ -114,10 +114,10 @@ class MasterNode:
             else:
                 jobs = []
         elif flag == "ToDo":  
-            if len(os.listdir(self.directory+"/TaskInbox"))>0:
+            if len(os.listdir(self.directory+"\\server_files\\TaskInbox"))>0:
                 while True:
                     try:
-                        with open(self.directory+"/TaskInbox/jobs.list", 'rb') as fileLoad:               
+                        with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad:               
                             jobs = pickle.load(fileLoad)
                             fileLoad.close()
                         break
@@ -140,8 +140,8 @@ class MasterNode:
             else:
                 jobs_save.append(job)
         # Saves the jobs
-        os.remove(self.directory+"/TaskInbox/jobs.list")
-        with open(self.directory+"/TaskInbox/jobs.list", 'wb') as fileSave:
+        os.remove(self.directory+"\\server_files\\TaskInbox\\jobs.list")
+        with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
         print("jobs.list saved")
         
