@@ -1,48 +1,50 @@
 import socket
 from threading import Thread, Lock
+from typing import Any
 import sys
 import traceback
 import os
-from pathlib import Path
 import pickle
 import numpy as np
 import random
-from numpy import true_divide
-from configuration import Configuration
+from configuration.configuration import Configuration
 import time 
 import io
-from job import Job
+from utils.job import Job
+
+# TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
+# -----------------------------------------------
+import pathlib
+
+FILE_PATH = f"{pathlib.Path(__file__).parent.resolve()}"
+# -----------------------------------------------
 
 class ServiceServer:
     """ 
         Service Server class: Instances of this class perform server functionality. Functionality:
-        * The server recieves requests from clients      * The configuration for this class is at slave_config.ini file
+        * The server recieves requests from clients     
+        * The configuration for this class is at slave_config.ini file
+    """
 
-            """
     def __init__(self):
-        self.directory = str(os.path.abspath(os.getcwd()))
-
-        self.configuration = Configuration(self.directory +"\\server_files\\server_config.ini")
+        # Configurates basic parameters of Service Server
+        self.configuration = Configuration(os.path.join(FILE_PATH,"server_config.ini"))
         self.ip_address = self.configuration.get_config_param('server',"ip")
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
-
-        
         self.elements_load = int(self.configuration.get_config_param("comms","buffer_size")) 
-
         # The socket of the server is created
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        
+        self.server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         try:
-            # Server binding
+            # Binds socket address
             self.server_socket.bind((self.ip_address,self.port))
-            
         except:
             print(f"UPS! something went wrong. ({sys.exc_info()})")
             sys.exit()
-    def activate(self):
-        """ Function to activate the server service node"""
+
+    def activate(self) -> None:
+        """ Function to activate the server service node. """
         # The server starts to listen 
         print("The server node is listening on the port {}".format(self.port))
         self.server_socket.listen() 
@@ -56,31 +58,25 @@ class ServiceServer:
             except:
                 print("Thread creation has failed")
                 traceback.print_exc()
-    
    
     def save_job(self,flag,job):
-        """Function to save a job"""
+        """Function to save a job. """
         if flag == 'Done':
-            #First jobs are loaded
+            # First jobs are loaded
             jobs = self.load_jobs(flag)
-
-            #The job is appended
+            # The job is appended
             jobs.append(job)
-
-            #Jobs are saved
-            with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
+            # Jobs are saved
+            with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
-
         elif flag == 'ToDo':
             #First jobs are loaded
             jobs = self.load_jobs(flag)
-            
             #The job is appended
             jobs.append(job)
-
             #Jobs are saved
-            with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
+            with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
                 fileSave.close()
 
@@ -117,6 +113,7 @@ class ServiceServer:
                 return True,jobs_return[0]
         else:    
             return False
+
     def delete_job(self,jobs_delete):
         """Function to delete an specific job"""
         jobs_save = []
@@ -130,8 +127,8 @@ class ServiceServer:
                 else:
                     jobs_save.append(job)
         # Saves the jobs
-        os.remove(self.directory+"\\server_files\\ResponseOutBox\\jobs.list")
-        with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
+        os.remove(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"))
+        with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
         print("jobs.list saved")
 
@@ -140,9 +137,9 @@ class ServiceServer:
         """Function to load all the payload to process"""
         jobs = []
         if flag == "Done":
-            if os.path.exists(self.directory+"\\server_files\\ResponseOutBox\\jobs.list"):
+            if os.path.exists(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list")):
                 try:
-                    with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
+                    with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'rb') as fileLoad:
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
                 except:
@@ -152,21 +149,19 @@ class ServiceServer:
         elif flag == "ToDo":   
             if os.path.exists('\\server_files\\TaskInbox\\jobs.list'):
                 try:
-                    with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad: 
+                    with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'rb') as fileLoad: 
                         jobs = pickle.load(fileLoad)
                         fileLoad.close()
                 except: 
                     pass
             else:
                 jobs = []
-       
         return jobs
     
-    def fragment_job(self,job):
+    def fragment_job(self, job: Job):
         """Function to check if a job needs to be fragmented"""
         jobs_fragmented = []
-        if len(job.payload)>self.elements_load:
-            
+        if len(job.payload) > self.elements_load:
             # Calculating the number of jobs to create
             fragments = np.ceil(len(job.payload)/self.elements_load)
             # Iterating over the number of fragments
@@ -192,9 +187,7 @@ class ServiceServer:
         print("Jobs fragmented = {}".format(len(jobs_fragmented)))
         return jobs_fragmented
 
-
-
-    def clientThread(self,client,dummy):
+    def clientThread(self, client: socket.socket):
         """Function to manage the conection of each client"""
         global print_lock
         while True:
@@ -229,7 +222,7 @@ class ServiceServer:
 
                 break
     
-    def recieve_data(self,client):
+    def recieve_data(self, client: socket.socket):
         try:
             n_bytes = b""
             byte = None
@@ -250,8 +243,8 @@ class ServiceServer:
             print("Error")
         time.sleep(0.1)
         return data
-    def send_data(self,client,data):
-    
+
+    def send_data(self, client: socket.socket, data: Any):
         payload = pickle.dumps(data)
         n_bytes = client.send(str(len(payload)).encode() + b"\r")
         client.sendall(payload) 

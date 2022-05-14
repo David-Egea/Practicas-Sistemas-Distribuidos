@@ -2,13 +2,21 @@ import socket
 from threading import Thread, ThreadError
 import sys
 import traceback
-from configuration import Configuration
+from typing import Any, List
+from utils.job import Job
+from configuration.configuration import Configuration
 import pickle
 import os
 import time
 import io
 
-# TODO:Checkear que las funciones son correctas
+# TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
+# -----------------------------------------------
+import pathlib
+
+FILE_PATH = f"{pathlib.Path(__file__).parent.resolve()}"
+# -----------------------------------------------
+
 class MasterNode:
     """ 
         Master Node class. Each Distributed Computing Network must have `one and only one instance` of this class. Functionality:
@@ -18,11 +26,10 @@ class MasterNode:
     """
     
     def __init__(self):
-        # Creates a list for registered slave nodes
-        self.directory = str(os.path.abspath(os.getcwd()))
+        # Configurates basic parameters of Service Server
         self._slave_nodes_regist = {}
         # Creates a configuration class
-        self._config = Configuration(self.directory +"\\server_files\\server_config.ini")
+        self._config = Configuration(os.path.join(FILE_PATH,"server_config.ini"))
         # Master node configuration
         self._master_ip = str(self._config.get_config_param("master","ip"))
         self._master_port = int(self._config.get_config_param("master","port_external"))
@@ -38,25 +45,16 @@ class MasterNode:
             print(f"[Error] An exception ocurred during master socket binding. ({sys.exc_info()})")
             sys.exit()
 
-
-    def stop(self) -> None:
-        """ Interrupts the master node."""
-        self._master_process.join()
-        self._master_process.close()
-
-    def check_missing_jobs(self):
-        """Function to check is there are any missing jobs to be done"""
-        if len(os.listdir(self.directory+"\\server_files\\TaskInbox"))>0:
-            jobs  = self.load_jobs("ToDo")
-            if len(jobs)>0:
-                print("There are missing jobs")
-                return True
-            else:
-                return False
+    def check_missing_jobs(self) -> bool:
+        """ Function to check is there are any missing jobs to be done. 
+            Returns True if there is any job to do, returns False otherwise. 
+        """
+        if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox"))) and len(self.load_jobs("ToDo")):
+            print("There are missing jobs")
+            return True
         else:
             return False
       
-
     def activate(self) -> None:
         """ Starts listening to available slave nodes, stablishing a communication with each of them. """
         self._master_socket.listen() # Master starts to listen on port
@@ -73,51 +71,46 @@ class MasterNode:
                 print("[Error] Thread creation failed!")
                 traceback.print_exc()
 
-    def save_job(self,flag,job):
-        """Function to save a job"""
+    def save_job(self, flag : str, job: Job) -> None:
+        """ Function to save a job. """
         if flag == 'Done':
-            #First jobs are loaded
+            # First jobs are loaded
             jobs = self.load_jobs(flag)
-
-            #The job is appended
+            # The job is appended
             jobs.append(job)
-
-            #Jobs are saved
-            with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'wb') as fileSave:
+            # Jobs are saved
+            with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
             fileSave.close()
-
         elif flag == 'ToDo':
             #First jobs are loaded
             jobs = self.load_jobs(flag)
-            
             #The job is appended
             jobs.append(job)
-
             #Jobs are saved
-            with open(self.directory+"\\server_files\\TaskInbox", 'wb') as fileSave:
+            with open(os.path.join(FILE_PATH,"server_files","TaskInbox"), 'wb') as fileSave:
                 pickle.dump(jobs, fileSave)
             fileSave.close()
 
-    def load_jobs(self,flag):
+    def load_jobs(self,flag) -> List:
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
         jobs = []
         if flag == "Done":
-            if len(os.listdir(self.directory+"\\server_files\\ResponseOutBox"))>0:
+            if len(os.listdir(os.path.join(FILE_PATH,"server_files\\ResponseOutBox"))):
                 try:
-                    with open(self.directory+"\\server_files\\ResponseOutBox\\jobs.list", 'rb') as fileLoad:
-                            jobs = pickle.load(fileLoad)
-                            fileLoad.close()
+                    with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'rb') as fileLoad:
+                        jobs = pickle.load(fileLoad)
+                        fileLoad.close()
                 except:
                     pass
             else:
                 jobs = []
         elif flag == "ToDo":  
-            if len(os.listdir(self.directory+"\\server_files\\TaskInbox"))>0:
+            if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox"))):
                 while True:
                     try:
-                        with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'rb') as fileLoad:               
+                        with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'rb') as fileLoad:               
                             jobs = pickle.load(fileLoad)
                             fileLoad.close()
                         break
@@ -140,8 +133,8 @@ class MasterNode:
             else:
                 jobs_save.append(job)
         # Saves the jobs
-        os.remove(self.directory+"\\server_files\\TaskInbox\\jobs.list")
-        with open(self.directory+"\\server_files\\TaskInbox\\jobs.list", 'wb') as fileSave:
+        os.remove(os.path.join(FILE_PATH,"TaskInbox","jobs.list"))
+        with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
         print("jobs.list saved")
         
@@ -158,7 +151,7 @@ class MasterNode:
         else:
             return 0
 
-    def recieve_data(self,client):
+    def recieve_data(self,client: socket.socket) -> Any:
         try:
             n_bytes = b""
             byte = None
@@ -180,25 +173,21 @@ class MasterNode:
         time.sleep(0.1)
         return data
 
-    def send_data(self,client,data):
-    
+    def send_data(self, client: socket.socket, data: Any) -> None:
         payload = pickle.dumps(data)
-        n_bytes = client.send(str(len(payload)).encode() + b"\r")
+        client.send(str(len(payload)).encode() + b"\r")
         client.sendall(payload) 
 
-
-    def slave_connection(self, slave_socket: socket.socket,dummy): 
-   
+    def slave_connection(self, slave_socket: socket.socket): 
         while True:
             # Checks if there are jobs to do
             if self.check_missing_jobs():
                 # Loads the job
-                
                 job_to_do = self.load_job_to_process()
                 if job_to_do !=0:
                     # Sends the job
                     self.send_data(slave_socket,job_to_do)
-                    #   Waits for the job to be done
+                    # Waits for the job to be done
                     job_done = self.recieve_data(slave_socket)
                     # Saves the job
                     self.save_job("Done",job_done)

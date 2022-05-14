@@ -1,10 +1,15 @@
-from pathlib import Path
-from multiprocessing import Process,Manager
-from configuration import Configuration
-from service_server import ServiceServer
-from master_node import MasterNode
+from multiprocessing import Process
+from configuration.configuration import Configuration
+from server_files.service_server import ServiceServer
+from server_files.master_node import MasterNode
+import os
 
-# TODO: CAMBIAR ESTA CLASE PARA QUE SEA EL SERVIDOR
+# TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
+# -----------------------------------------------
+import pathlib
+
+FILE_PATH = f"{pathlib.Path(__file__).parent.resolve()}"
+# -----------------------------------------------
 
 class Server:
     """ 
@@ -16,9 +21,10 @@ class Server:
     
     def __init__(self):
         # Creates a configuration class
-        self._config = Configuration("C:\\Users\\Raul\\Documents\\Github\\Practicas-Sistemas-Distribuidos\\PracticaFinal\\server_files\\server_config.ini")
-       
+        self._config = Configuration(os.path.join(FILE_PATH,"server_config.ini"))
+        # Creates an instance of Master Node for task management
         self.master_node = MasterNode()
+        # Craetes an instance of Service Server for request
         self.server_node = ServiceServer()
 
     def start(self) -> None:
@@ -29,17 +35,15 @@ class Server:
         self._server_process = Process(target=self.server_node.activate, args=())
         self._master_process.start()
         self._server_process.start()
-        while True:
-            pass
-      
-    
-
-    def stop(self) -> None:
-        """ Interrupts the master node."""
+        # Waits until processes are finished
         self._master_process.join()
         self._server_process.join()
+
+    def stop(self) -> None:
+        """ Interrupts the master node. """
         self._master_process.close()
         self._server_process.close()
+
 if __name__ == "__main__":
     try:
         server = Server()
