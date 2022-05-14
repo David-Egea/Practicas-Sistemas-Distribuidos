@@ -144,7 +144,7 @@ class Client:
     
     def ftp_server(self):
         authorizer = DummyAuthorizer()
-        authorizer.add_user(self.ftp_user, self.ftp_password, self.ftp_directory, perm='elr')
+        authorizer.add_user(self.ftp_user, self.ftp_password, self.ftp_directory, perm='elradfmwMT')
 
         handler = FTPHandler
         handler.authorizer = authorizer
