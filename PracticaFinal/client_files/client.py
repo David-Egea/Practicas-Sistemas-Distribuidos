@@ -163,25 +163,26 @@ class Client:
 
     def main(self):
         """Main thread for the application"""
-        while self.check_missing_payload():
-            # Sending the job
-            self.send_job()
+        while True:
+            if self.check_missing_payload():
+                # Sending the job
+                self.send_job()
 
-            # Waits for the job to arrive
-            job_recieved = self.recieve_data()
-            self.save_payload(job_recieved.payload)
+                # Waits for the job to arrive
+                job_recieved = self.recieve_data()
+                self.save_payload(job_recieved.payload)
 
-            # Sends the confirmation msg
-            conf_msg = "Ok"
-            self.send_data(conf_msg)
-            # waits for the confirmation of the msg
-            msg = self.recieve_data()
-            if msg == "Ok":
-                print("Everything correct")
-                pass
-            else:
-                break
-        print("Loop finished")
+                # Sends the confirmation msg
+                conf_msg = "Ok"
+                self.send_data(conf_msg)
+                # waits for the confirmation of the msg
+                msg = self.recieve_data()
+                if msg == "Ok":
+                    print("Everything correct")
+                    pass
+                else:
+                    break
+            print("Loop finished")
 
         
       
