@@ -143,16 +143,20 @@ class MasterNode:
         os.remove(self.directory+"/TaskInbox/jobs.list")
         with open(self.directory+"/TaskInbox/jobs.list", 'wb') as fileSave:
             pickle.dump(jobs_save, fileSave)
+        print("jobs.list saved")
         
     def load_job_to_process(self):
         """ Function that loads a job, and deletes it from the list"""
         jobs = self.load_jobs("ToDo")
-        # Gets the job to process
-        job_to_process = jobs[0]
-        # Deteletes the job
-        self.delete_job(jobs[0])
+        if len(jobs)>0:
+            # Gets the job to process
+            job_to_process = jobs[0]
+            # Deteletes the job
+            self.delete_job(jobs[0])
 
-        return job_to_process
+            return job_to_process
+        else:
+            return []
 
     def recieve_data(self,client):
         try:
@@ -191,21 +195,21 @@ class MasterNode:
                 # Loads the job
                 
                 job_to_do = self.load_job_to_process()
-                
-                # Sends the job
-                self.send_data(slave_socket,job_to_do)
-                #   Waits for the job to be done
-                job_done = self.recieve_data(slave_socket)
-                # Saves the job
-                self.save_job("Done",job_done)
-                # Sends the ok command
-                self.send_data(slave_socket,"Ok")
-                # Waits for the confirmation from the slave
-                conf_msg = self.recieve_data(slave_socket)
-                if conf_msg == "Ok":
-                    print("Everything went ok")
-                    pass
-                else:
-                    print("There is an error with the slave")
-                    # TODO: Guardar el trabajo no realizado
-                    break
+                if len(job_to_do)>0:
+                    # Sends the job
+                    self.send_data(slave_socket,job_to_do)
+                    #   Waits for the job to be done
+                    job_done = self.recieve_data(slave_socket)
+                    # Saves the job
+                    self.save_job("Done",job_done)
+                    # Sends the ok command
+                    self.send_data(slave_socket,"Ok")
+                    # Waits for the confirmation from the slave
+                    conf_msg = self.recieve_data(slave_socket)
+                    if conf_msg == "Ok":
+                        print("Everything went ok")
+                        pass
+                    else:
+                        print("There is an error with the slave")
+                        # TODO: Guardar el trabajo no realizado
+                        break
