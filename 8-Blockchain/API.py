@@ -79,7 +79,8 @@ def register_new_node():
     keys = data_recieved.keys()
     if minimum_fields[0] in keys :
         # Adding the node
-        peers.add(data_recieved["new_node_address"])
+        if data_recieved["new_node_address"] != request.host:
+            peers.add(data_recieved["new_node_address"])
         return get_chain()
     else:
         return ("Invalid transaction",404)
@@ -87,52 +88,58 @@ def register_new_node():
 @app.route("/register_with_existing_node",methods = ["POST"])
 def register_existing_node():
     global peers, blockchain
+    # Gets the node_address field from request
     node_address = request.get_json()["node_address"]
-    # Constructs a POST request to register_new_node endpoint
-    url = f"http://{node_address}/register_new_node"
-    payload = json.dumps({
-    "new_node_address": request.host
-    })
-    headers = {
-    'Content-Type': 'application/json'
-    }
-    # Sends the request and returns the answer
-    response = requests.request("POST", url, headers=headers, data=payload)
-    # Depending on the status code of response
-    if response.status_code == 201:
-        # Updates chain and peers
-        chain_dumps = response.json()["chain"]
-        peers_dumps = response.json()["peers"]
-        # Setting the peers
-        for block_dumps in chain_dumps:
-            # If it the first block (genesis) then it is added automately
-            block = Block(int(block_dumps["index"]),block_dumps["transactions"],float(block_dumps["timestamp"]),block_dumps["previous_hash"])
-            block.nonce = int(block_dumps["nonce"])
-            # Depending on whether it is the first block or not
-            if block_dumps == chain_dumps[0]:
-                # Creates a blockchain with the genesis block recieved
-                block.current_hash = block_dumps["current_hash"]
-                blockchain_dumps = Blockchain(genesis_block=block)
-            else:
-                # Attemps to add the block tothe blockchain
-                was_added = blockchain_dumps.append_block(block,block_dumps["current_hash"])
-                if not was_added:
-                    return (f"Validation of chain failed ({block} - {block}", 400) # The validation failed
-        # The completition of new blockchain was succesful
-        blockchain = blockchain_dumps
-        # Sets the difficulty of the blockchain depending on the number of zeros of last block
-        difficulty = 0
-        char = block.current_hash[0]
-        while char == '0':
-            difficulty += 1
-            char = block.current_hash[difficulty]   
-        blockchain.difficulty = difficulty # Asigns the difficulty to the blockchain
-        # Creates a new set of peers
-        peers = peers_dumps
-        return ("Registration successful", 200)
+    if request.host != node_address:
+        # Constructs a POST request to register_new_node endpoint
+        url = f"http://{node_address}/register_new_node"
+        payload = json.dumps({
+        "new_node_address": request.host
+        })
+        headers = {
+        'Content-Type': 'application/json'
+        }
+        # Sends the request and returns the answer
+        response = requests.request("POST", url, headers=headers, data=payload)
+        # Depending on the status code of response
+        if response.status_code == 201:
+            # Updates chain and peers
+            chain_dumps = response.json()["chain"]
+            peers_dumps = response.json()["peers"]
+            # Setting the peers
+            for block_dumps in chain_dumps:
+                # If it the first block (genesis) then it is added automately
+                block = Block(int(block_dumps["index"]),block_dumps["transactions"],float(block_dumps["timestamp"]),block_dumps["previous_hash"])
+                block.nonce = int(block_dumps["nonce"])
+                # Depending on whether it is the first block or not
+                if not block_dumps["index"]:
+                    # Creates a blockchain with the genesis block recieved
+                    block.current_hash = block_dumps["current_hash"]
+                    blockchain_dumps = Blockchain(genesis_block=block)
+                else:
+                    # Attemps to add the block tothe blockchain
+                    was_added = blockchain_dumps.append_block(block,block_dumps["current_hash"])
+                    if not was_added:
+                        return (f"Validation of chain failed", 400) # The validation failed
+            # The completition of new blockchain was succesful
+            blockchain = blockchain_dumps
+            # Sets the difficulty of the blockchain depending on the number of zeros of last block
+            difficulty = 0
+            char = block.current_hash[0]
+            while char == '0':
+                difficulty += 1
+                char = block.current_hash[difficulty]   
+            blockchain.difficulty = difficulty # Asigns the difficulty to the blockchain
+            # Creates a new set of peers
+            if request.host in peers_dumps: peers_dumps.remove(request.host)
+            if node_address not in peers_dumps: peers_dumps.append(node_address)
+            peers = set(peers_dumps)
+            return ("Registration successful", 200)
+        else:
+            # The post request failed
+            return response.content, response.status_code
     else:
-        # The post request failed
-        return response.content, response.status_code
+        return ("Self node is already registered.", 200)
 
 def consensus() -> bool :
     """ 
@@ -144,11 +151,11 @@ def consensus() -> bool :
     longest_chain = None
     current_len = len(blockchain.chain)
     for node in peers:
-        # A GET request to endpoint /chain is sent to the node direction
-        url = f"http://{node}/chain"
-        payload={}
-        headers = {}
         try:
+            # A GET request to endpoint /chain is sent to the node direction
+            url = f"http://{node}/chain"
+            payload={}
+            headers = {}
             response = requests.request("GET", url, headers=headers, data=payload)
             if response.status_code == 200:
                 length = response.json()["length"]
@@ -157,7 +164,7 @@ def consensus() -> bool :
                     # The chain is longer than the current one
                     longest_chain = chain
                     current_len = length
-        except ConnectionError:
+        except ConnectionRefusedError:
             pass
     if longest_chain is not None:
         # The blockchain of node is now the longest found
@@ -197,10 +204,14 @@ def announce_new_block(block: Block, request: Flask.request_class):
     # Iterates for each node in peers variable
     for node in peers:
         if node != request.host_url:
-            # Sends a POST request to /add_block
-            url = f"http://{node}/add_block"
-            payload = json.dumps(block.__dict__,sort_keys=True)
-            headers = {
-            'Content-Type': 'application/json'
-            }
-            requests.request("POST", url, headers=headers, data=payload)
+            try:
+                # Sends a POST request to /add_block
+                url = f"http://{node}/add_block"
+                payload = json.dumps(block.__dict__,sort_keys=True)
+                headers = {
+                'Content-Type': 'application/json'
+                }
+                requests.request("POST", url, headers=headers, data=payload)
+            except ConnectionRefusedError:
+                # In case the node is not responding
+                pass
