@@ -86,6 +86,7 @@ class Client:
         listed_directory = os.listdir(self.directoryToDo)
         payload_process = []
         i  = 0
+        time.sleep(1)
         for element in listed_directory:
             if i< self.elements_load:
                 try:
