@@ -9,7 +9,7 @@ FROM python:3
 
 WORKDIR /src
 
-COPY slave_node.py slave_node.py
+COPY slave.py slave.py
 COPY configuration.py configuration.py
 COPY slave_config.ini slave_config.ini
 COPY requirements.txt requirements.txt
