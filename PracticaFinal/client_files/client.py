@@ -38,7 +38,8 @@ class Client:
         # Sets the Ip address
         self.ip = socket.gethostbyname(socket.gethostname())
         # Creating the ftp server thread
-        Thread(target = self.ftp_server).start()
+        self.ftp_server_thread = Thread(target = self.ftp_server)
+        self.ftp_server_thread.start()
         # Variables to load data and save it
         self.directoryToDo = os.path.join(FILE_PATH,self.configuration.get_config_param("client","directoryToDo"))
         self.directoryToSave = os.path.join(FILE_PATH,self.configuration.get_config_param("client","directoryToSave"))
@@ -49,7 +50,7 @@ class Client:
         self.server_address = (self.ip_address_server,self.port_server) 
         self.socket_client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.socket_client.connect(self.server_address)
-        self.main()
+        
         # Waiting for the thread to finish
         print("Client finished")
 
@@ -101,7 +102,7 @@ class Client:
         """ Function to save the results of the processing"""
         for element in payload:
             # Writing the image
-            cv2.imwrite(self.directoryToSave+str(self.indexImage)+".jpg",element)
+            cv2.imwrite(os.path.join(self.directoryToSave,str(self.indexImage)+".jpg"),element)
             # Incrementing the index by one
             self.indexImage += 1
 
@@ -171,11 +172,20 @@ class Client:
                     conf_msg = "Ok"
                     self.send_data(conf_msg)
         print("While finished")
+    def close(self):
+        self.send_data("Bye")
+        self.socket_client.close()
+        
+
                     
 
 if __name__ == "__main__":
+    client = Client()
     try:
-        client = Client()
+        client.main()
     except KeyboardInterrupt:
+        client.close()
+        del(client)
         print("Client finished")
+        
     

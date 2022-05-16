@@ -99,6 +99,7 @@ class Slave():
         self._slave_socket.sendall(payload) 
 
     def recieve_data(self) -> Job:
+        job = []
         try:
             n_bytes = b""
             byte = None

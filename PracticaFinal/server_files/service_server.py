@@ -1,3 +1,4 @@
+from bdb import Breakpoint
 import socket
 from threading import Thread, Lock
 from typing import Any
@@ -32,7 +33,7 @@ class ServiceServer:
         self.ip_address = self.configuration.get_config_param('server',"ip")
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
-        self.elements_load = int(self.configuration.get_config_param("comms","buffer_size")) 
+        self.elements_load = int(self.configuration.get_config_param("payload","elementsLoad")) 
         # Index to save the jobs
         self.index_job = 0
         # The socket of the server is created
@@ -113,12 +114,16 @@ class ServiceServer:
         """
         if len(os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")))>0:
             for element in os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")):
-                with open(os.path.join(FILE_PATH,"ResponseOutBox",element), 'rb') as fileLoad:
-                        job = pickle.load(fileLoad)
-                        fileLoad.close()
-                if job.client_id == client_id:
-                    self.delete_job(job)
-                    return job
+                try:
+                    with open(os.path.join(FILE_PATH,"ResponseOutBox",element), 'rb') as fileLoad:
+                            job = pickle.load(fileLoad)
+                            fileLoad.close()
+                    if job.client_id == client_id:
+                        self.delete_job(job)
+                        return job
+                except:
+                    print("Error on pickle load")
+                    break
         return None
 
     def delete_job(self,job_delete):
@@ -166,10 +171,10 @@ class ServiceServer:
             fragments = np.ceil(len(job.payload)/self.elements_load)
             # Iterating over the number of fragments
             actual_fragment = 0
-            for i in range(0,fragments):
+            for i in range(0,int(fragments)):
                 # Calculating the number of elements 
                 if actual_fragment+self.elements_load>=len(job.payload):
-                    calculated_payload = job.payload[actual_fragment:len(len(job.payload))]
+                    calculated_payload = job.payload[actual_fragment:len(job.payload)]
                 else:
                     calculated_payload = job.payload[actual_fragment:actual_fragment+self.elements_load]
                 actual_fragment = actual_fragment+self.elements_load
@@ -190,10 +195,14 @@ class ServiceServer:
     def clientThread(self, client: socket.socket,dummy):
         """Function to manage the conection of each client"""
         global print_lock
-        while True:
+        finished = False
+        while not finished:
             elements_sended = 0
             # Waits to recieve a job from the client
             job_to_do = self.recieve_data(client)
+            if job_to_do == "Bye":
+                finished = True
+                break
             jobs_fragmented = self.fragment_job(job_to_do)
             fragments = len(jobs_fragmented)
             print(len(jobs_fragmented))
@@ -218,6 +227,9 @@ class ServiceServer:
                 msg = self.recieve_data(client)
                 if msg == 'Ok':
                     pass
+                elif msg == "Bye":
+                    finished = True
+                    break
                 else:
                     print("There is an error with the node")
 
@@ -227,6 +239,7 @@ class ServiceServer:
             # Sending confirmation msg
             conf_msg= "Ok"
             self.send_data(client,conf_msg)
+        print("Client finished")
         
     
     def recieve_data(self, client: socket.socket):
