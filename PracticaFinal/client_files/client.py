@@ -162,10 +162,9 @@ class Client:
         while True:
             if self.check_missing_payload():
                 # Sending the job
-                try:
-                    self.send_job()
-                except:
-                    break
+                
+                self.send_job()
+                
 
                 # Waits for the job to arrive
                 msg  = ""
