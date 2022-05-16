@@ -90,7 +90,7 @@ class Client:
             if i< self.elements_load:
                 time.sleep(0.5)
                 try:
-                    image= cv2.imread(self.directoryToDo+"\\"+element)
+                    image= cv2.imread(self.directoryToDo+element)
                 except:
                     break
                 i=i+1
