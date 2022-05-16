@@ -24,4 +24,4 @@ COPY /task_modules/yolov5_task_module.py /src/task_modules/yolov5_task_module.py
 
 RUN pip3 install -r requirements.txt
 RUN pip3 install opencv-python-headless
-CMD [ "python", "./slave_node.py" ]
+CMD [ "python", "./slave.py" ]
