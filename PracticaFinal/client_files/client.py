@@ -90,14 +90,14 @@ class Client:
             if i< self.elements_load:
                 try:
                     image= cv2.imread(self.directoryToDo+"\\"+element)
-                    i=i+1
-                    payload_process.append(image)
-                    # Constructs the path pof the element
-                    element_path = os.path.join(self.directoryToDo,element)
-                    # The element is deleted
-                    os.remove(element_path)
                 except:
                     break
+                i=i+1
+                payload_process.append(image)
+                # Constructs the path pof the element
+                element_path = os.path.join(self.directoryToDo,element)
+                # The element is deleted
+                os.remove(element_path)
             else:
                 break
         print("Payload loaded {} elements".format(len(payload_process)))
