@@ -36,7 +36,7 @@ class Client:
         self.ftp_directory = os.path.join(FILE_PATH,self.configuration.get_config_param("ftp","ftpDirectory"))
         self.ftp_port = int(self.configuration.get_config_param("ftp","port"))
         # Sets the Ip address
-        self.ip = socket.gethostbyname(socket.gethostname())
+        self.get_ip()
         # Creating the ftp server thread
         self.ftp_server_thread = Thread(target = self.ftp_server)
         self.ftp_server_thread.start()
@@ -66,6 +66,11 @@ class Client:
             self.send_data(job)
         else:
             raise Exception("There is no element to load")
+    def get_ip(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        self.ip = s.getsockname()[0]
+        print(s.getsockname()[0])
 
     def check_missing_payload(self)->bool:
         """Function if there is payload to process"""
