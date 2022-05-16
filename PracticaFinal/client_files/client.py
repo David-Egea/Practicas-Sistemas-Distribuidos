@@ -65,7 +65,7 @@ class Client:
             # Sending data
             self.send_data(job)
         else:
-            time.sleep(2)
+            print("There are no missing jobs")
     def get_ip(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
