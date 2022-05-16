@@ -7,10 +7,10 @@ import os
 import pickle
 import numpy as np
 import random
-from configuration.configuration import Configuration
+from configuration import Configuration
 import time 
 import io
-from utils.job import Job
+from job import Job
 
 # TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
 # -----------------------------------------------
@@ -33,6 +33,8 @@ class ServiceServer:
         self.port = int(self.configuration.get_config_param("server","port_external"))
         self.buffer_size = int(self.configuration.get_config_param("comms","buffer_size"))
         self.elements_load = int(self.configuration.get_config_param("comms","buffer_size")) 
+        # Index to save the jobs
+        self.index_job = 0
         # The socket of the server is created
         self.server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
@@ -62,29 +64,24 @@ class ServiceServer:
     def save_job(self,flag,job):
         """Function to save a job. """
         if flag == 'Done':
-            # First jobs are loaded
-            jobs = self.load_jobs(flag)
-            # The job is appended
-            jobs.append(job)
-            # Jobs are saved
-            with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
-                pickle.dump(jobs, fileSave)
+            name = "job"+str(self.index_job)+".list"
+            with open(os.path.join(FILE_PATH,"ResponseOutBox",name), 'wb') as fileSave:
+                pickle.dump(job, fileSave)
                 fileSave.close()
+            self.index_job = self.index_job+1
         elif flag == 'ToDo':
-            #First jobs are loaded
-            jobs = self.load_jobs(flag)
-            #The job is appended
-            jobs.append(job)
-            #Jobs are saved
-            with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'wb') as fileSave:
-                pickle.dump(jobs, fileSave)
+            name = "job"+str(self.index_job)+".list"
+            with open(os.path.join(FILE_PATH,"TaskInbox",name), 'wb') as fileSave:
+                pickle.dump(job, fileSave)
                 fileSave.close()
+            self.index_job = self.index_job+1
 
     def is_job_done(self,client_id):
         # TODO: adaptarlo a jobs fragmentados
         # First all the jobs are loaded
+        """
         jobs_return = []
-        jobs_loaded = self.load_jobs("Done")
+        jobs_loaded = self.load_job("Done")
         fragmented = False
         for job in jobs_loaded:
             if job.client_id == client_id:
@@ -113,50 +110,53 @@ class ServiceServer:
                 return True,jobs_return[0]
         else:    
             return False
+        """
+        if len(os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")))>0:
+            for element in os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")):
+                with open(os.path.join(FILE_PATH,"ResponseOutBox",element), 'rb') as fileLoad:
+                        job = pickle.load(fileLoad)
+                        fileLoad.close()
+                if job.client_id == client_id:
+                    self.delete_job(job)
+                    return job
+        return None
 
-    def delete_job(self,jobs_delete):
+    def delete_job(self,job_delete):
         """Function to delete an specific job"""
-        jobs_save = []
-        #First loads all the jobs
-        jobs = self.load_jobs("Done")
-        for job in jobs:
-            for job_delete in jobs_delete:
-                if job.id == job_delete.id:
-                    print("Job Equal")
-                    pass
-                else:
-                    jobs_save.append(job)
-        # Saves the jobs
-        os.remove(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"))
-        with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
-            pickle.dump(jobs_save, fileSave)
-        print("jobs.list saved")
+        for element in os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")):
+            with open(os.path.join(FILE_PATH,"ResponseOutBox",element), 'rb') as fileLoad:
+                job = pickle.load(fileLoad)
+                fileLoad.close()
+            if job.id == job_delete.id:
+                os.remove(os.path.join(FILE_PATH,"ResponseOutBox",element))
 
-    def load_jobs(self,flag):
+    def load_job(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
-        jobs = []
+        job = []
         if flag == "Done":
-            if os.path.exists(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list")):
+            if len(os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")))>0:
+                elements = os.listdir(os.path.join(FILE_PATH,"ResponseOutBox"))
                 try:
-                    with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'rb') as fileLoad:
-                        jobs = pickle.load(fileLoad)
+                    with open(os.path.join(FILE_PATH,"ResponseOutBox",elements[0]), 'rb') as fileLoad:
+                        job = pickle.load(fileLoad)
                         fileLoad.close()
                 except:
                     pass
             else:
-                jobs = []
+                job = []
         elif flag == "ToDo":   
-            if os.path.exists('\\server_files\\TaskInbox\\jobs.list'):
+            if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox")))>0:
+                elements = os.listdir(os.path.join(FILE_PATH,"TaskInbox"))
                 try:
-                    with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'rb') as fileLoad: 
-                        jobs = pickle.load(fileLoad)
+                    with open(os.path.join(FILE_PATH,"TaskInbox",elements[0]), 'rb') as fileLoad:
+                        job = pickle.load(fileLoad)
                         fileLoad.close()
-                except: 
+                except:
                     pass
             else:
-                jobs = []
-        return jobs
+                job = []
+        return job
     
     def fragment_job(self, job: Job):
         """Function to check if a job needs to be fragmented"""
@@ -187,13 +187,15 @@ class ServiceServer:
         print("Jobs fragmented = {}".format(len(jobs_fragmented)))
         return jobs_fragmented
 
-    def clientThread(self, client: socket.socket):
+    def clientThread(self, client: socket.socket,dummy):
         """Function to manage the conection of each client"""
         global print_lock
         while True:
+            elements_sended = 0
             # Waits to recieve a job from the client
             job_to_do = self.recieve_data(client)
             jobs_fragmented = self.fragment_job(job_to_do)
+            fragments = len(jobs_fragmented)
             print(len(jobs_fragmented))
             # Getting the client id
             client_id = job_to_do.client_id
@@ -202,25 +204,30 @@ class ServiceServer:
                 self.save_job("ToDo",job_to_save)
             print("Jobs saved")
 
-            # Waits to get the job done
-            while not self.is_job_done(client_id):
-                pass
-            print("Job finished")
-            # The job is sended to the client
-            job_to_send = self.is_job_done(client_id)[1]
-            self.send_data(client,job_to_send)
-            # Waits for the confirmation msg
-            msg = self.recieve_data(client)
+            while elements_sended<fragments:
+                # Waits to get the job done
+                job_done = self.is_job_done(client_id)
+                while job_done==None:
+                    job_done = self.is_job_done(client_id)
+                    
+                print("Job finished")
+                # The job is sended to the client
+                self.send_data(client,job_done)
+                elements_sended = elements_sended+1
+                # Waits for the confirmation msg
+                msg = self.recieve_data(client)
+                if msg == 'Ok':
+                    pass
+                else:
+                    print("There is an error with the node")
 
-            if msg == "Ok":
-                print("Everything correct")
-                # Sending confirmation msg
-                conf_msg= "Ok"
-                self.send_data(client,conf_msg)
-            else:
-                print("There is an error with the node")
-
-                break
+                    break
+           
+            print("Everything correct")
+            # Sending confirmation msg
+            conf_msg= "Ok"
+            self.send_data(client,conf_msg)
+        
     
     def recieve_data(self, client: socket.socket):
         try:

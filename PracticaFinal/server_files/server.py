@@ -1,7 +1,7 @@
 from multiprocessing import Process
-from configuration.configuration import Configuration
-from server_files.service_server import ServiceServer
-from server_files.master_node import MasterNode
+from configuration import Configuration
+from service_server import ServiceServer
+from master_node import MasterNode
 import os
 
 # TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
@@ -20,8 +20,6 @@ class Server:
     """
     
     def __init__(self):
-        # Creates a configuration class
-        self._config = Configuration(os.path.join(FILE_PATH,"server_config.ini"))
         # Creates an instance of Master Node for task management
         self.master_node = MasterNode()
         # Craetes an instance of Service Server for request

@@ -1,5 +1,5 @@
 from typing import List
-from slave_files.task_modules.task_module import TaskModule
+from task_modules.task_module import TaskModule
 import numpy as np
 import cv2
 
@@ -43,4 +43,7 @@ class ImageTaskModule(TaskModule):
     def _process_image(self, image: np.ndarray) -> None:
         """ Image processing method. """
         # In this case the image is converted from BGR to Gray colorscale
-        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        try:
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        except: 
+            return "Fail"

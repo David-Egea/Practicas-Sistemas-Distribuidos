@@ -2,10 +2,10 @@ import socket
 from typing import Any
 import cv2
 import pickle
-from configuration.configuration import Configuration
+from configuration import Configuration
 import time
 import io
-from utils.job import Job
+from job import Job
 import random
 import os
 from threading import Thread
@@ -58,13 +58,13 @@ class Client:
        if self.check_missing_payload:
         # Loading data
         payload = self.load_payload()
-        if len(payload)>0:
+        if len(payload)>0 and not any(elem is None for elem in payload):
             # Building the job object
             job = Job(self.id,self.job_type,payload)
             # Sending data
             self.send_data(job)
         else:
-            print("There is no missing payload to process")
+            raise Exception("There is no element to load")
 
     def check_missing_payload(self)->bool:
         """Function if there is payload to process"""
@@ -82,13 +82,16 @@ class Client:
         i  = 0
         for element in listed_directory:
             if i< self.elements_load:
-                image= cv2.imread(self.directoryToDo+element)
-                i=i+1
-                payload_process.append(image)
-                # Constructs the path pof the element
-                element_path = os.path.join(self.directoryToDo,element)
-                # The element is deleted
-                os.remove(element_path)
+                try:
+                    image= cv2.imread(self.directoryToDo+"\\"+element)
+                    i=i+1
+                    payload_process.append(image)
+                    # Constructs the path pof the element
+                    element_path = os.path.join(self.directoryToDo,element)
+                    # The element is deleted
+                    os.remove(element_path)
+                except:
+                    break
             else:
                 break
         print("Payload loaded {} elements".format(len(payload_process)))
@@ -153,20 +156,22 @@ class Client:
         while True:
             if self.check_missing_payload():
                 # Sending the job
-                self.send_job()
+                try:
+                    self.send_job()
+                except:
+                    break
 
                 # Waits for the job to arrive
-                job_recieved = self.recieve_data()
-                self.save_payload(job_recieved.payload)
-
-                # Sends the confirmation msg
-                conf_msg = "Ok"
-                self.send_data(conf_msg)
-                # waits for the confirmation of the msg
-                msg = self.recieve_data()
-                while msg != "Ok":
-                    msg = self.recieve_data()  
-            print("Loop finished")      
+                msg  = ""
+                while True:
+                    msg = self.recieve_data()
+                    if msg == "Ok":
+                        break
+                    self.save_payload(msg.payload)
+                    conf_msg = "Ok"
+                    self.send_data(conf_msg)
+        print("While finished")
+                    
 
 if __name__ == "__main__":
     try:

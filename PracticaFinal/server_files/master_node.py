@@ -3,8 +3,8 @@ from threading import Thread, ThreadError
 import sys
 import traceback
 from typing import Any, List
-from utils.job import Job
-from configuration.configuration import Configuration
+from job import Job
+from configuration import Configuration
 import pickle
 import os
 import time
@@ -37,6 +37,7 @@ class MasterNode:
         self._master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.buffer_size = int(self._config.get_config_param("comms","buffer_size"))
+        self.index_job = 0
 
         try:
             # Attempts to bind the direction to the address
@@ -49,7 +50,7 @@ class MasterNode:
         """ Function to check is there are any missing jobs to be done. 
             Returns True if there is any job to do, returns False otherwise. 
         """
-        if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox"))) and len(self.load_jobs("ToDo")):
+        if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox")))>0:
             print("There are missing jobs")
             return True
         else:
@@ -71,85 +72,60 @@ class MasterNode:
                 print("[Error] Thread creation failed!")
                 traceback.print_exc()
 
-    def save_job(self, flag : str, job: Job) -> None:
-        """ Function to save a job. """
+    def save_job(self,flag,job):
+        """Function to save a job. """
         if flag == 'Done':
-            # First jobs are loaded
-            jobs = self.load_jobs(flag)
-            # The job is appended
-            jobs.append(job)
-            # Jobs are saved
-            with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'wb') as fileSave:
-                pickle.dump(jobs, fileSave)
-            fileSave.close()
+            name = "job"+str(self.index_job)+".list"
+            with open(os.path.join(FILE_PATH,"ResponseOutBox",name), 'wb') as fileSave:
+                pickle.dump(job, fileSave)
+                fileSave.close()
+            self.index_job = self.index_job+1
+            print("Job Done saved")
         elif flag == 'ToDo':
-            #First jobs are loaded
-            jobs = self.load_jobs(flag)
-            #The job is appended
-            jobs.append(job)
-            #Jobs are saved
-            with open(os.path.join(FILE_PATH,"server_files","TaskInbox"), 'wb') as fileSave:
-                pickle.dump(jobs, fileSave)
-            fileSave.close()
+            name = "job"+str(self.index_job)+".list"
+            with open(os.path.join(FILE_PATH,"TaskInbox",name), 'wb') as fileSave:
+                pickle.dump(job, fileSave)
+                fileSave.close()
+            self.index_job = self.index_job+1
 
-    def load_jobs(self,flag) -> List:
+    
+    def delete_job(self,job_delete):
+        """Function to delete an specific job"""
+        for element in os.listdir(os.path.join(FILE_PATH,"TaskInbox")):
+            with open(os.path.join(FILE_PATH,"TaskInbox",element), 'rb') as fileLoad:
+                job = pickle.load(fileLoad)
+                fileLoad.close()
+            if job.id == job_delete.id:
+                os.remove(os.path.join(FILE_PATH,"TaskInbox",element))
+
+        
+    def load_job(self,flag):
         # TODO: revisar que el archivo exista, si no existe devolver una lista vacía
         """Function to load all the payload to process"""
-        jobs = []
+        job = None
         if flag == "Done":
-            if len(os.listdir(os.path.join(FILE_PATH,"server_files\\ResponseOutBox"))):
+            if len(os.listdir(os.path.join(FILE_PATH,"ResponseOutBox")))>0:
+                elements = os.listdir(os.path.join(FILE_PATH,"ResponseOutBox"))
                 try:
-                    with open(os.path.join(FILE_PATH,"ResponseOutBox","jobs.list"), 'rb') as fileLoad:
-                        jobs = pickle.load(fileLoad)
+                    with open(os.path.join(FILE_PATH,"ResponseOutBox",elements[0]), 'rb') as fileLoad:
+                        job = pickle.load(fileLoad)
                         fileLoad.close()
                 except:
                     pass
             else:
-                jobs = []
-        elif flag == "ToDo":  
-            if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox"))):
-                while True:
-                    try:
-                        with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'rb') as fileLoad:               
-                            jobs = pickle.load(fileLoad)
-                            fileLoad.close()
-                        break
-                    except:
-                        # If there is a fail it loops back
-                        pass
+                job = None
+        elif flag == "ToDo":   
+            if len(os.listdir(os.path.join(FILE_PATH,"TaskInbox")))>0:
+                elements = os.listdir(os.path.join(FILE_PATH,"TaskInbox"))
+                try:
+                    with open(os.path.join(FILE_PATH,"TaskInbox",elements[0]), 'rb') as fileLoad:
+                        job = pickle.load(fileLoad)
+                        fileLoad.close()
+                except:
+                    pass
             else:
-                jobs = []
-        return jobs
-
-    def delete_job(self,job_delete):
-        """Function to delete an specific job"""
-        jobs_save = []
-        #First loads all the jobs
-        jobs = self.load_jobs("ToDo")
-        for job in jobs:
-            if job.id == job_delete.id:
-                print("Job Equal")
-                pass
-            else:
-                jobs_save.append(job)
-        # Saves the jobs
-        os.remove(os.path.join(FILE_PATH,"TaskInbox","jobs.list"))
-        with open(os.path.join(FILE_PATH,"TaskInbox","jobs.list"), 'wb') as fileSave:
-            pickle.dump(jobs_save, fileSave)
-        print("jobs.list saved")
-        
-    def load_job_to_process(self):
-        """ Function that loads a job, and deletes it from the list"""
-        jobs = self.load_jobs("ToDo")
-        if len(jobs)>0:
-            # Gets the job to process
-            job_to_process = jobs[0]
-            # Deteletes the job
-            self.delete_job(jobs[0])
-
-            return job_to_process
-        else:
-            return 0
+                job = None
+        return job
 
     def recieve_data(self,client: socket.socket) -> Any:
         try:
@@ -178,13 +154,13 @@ class MasterNode:
         client.send(str(len(payload)).encode() + b"\r")
         client.sendall(payload) 
 
-    def slave_connection(self, slave_socket: socket.socket): 
+    def slave_connection(self, slave_socket: socket.socket,dummy): 
         while True:
             # Checks if there are jobs to do
             if self.check_missing_jobs():
                 # Loads the job
-                job_to_do = self.load_job_to_process()
-                if job_to_do !=0:
+                job_to_do = self.load_job("ToDo")
+                if job_to_do!=None:
                     # Sends the job
                     self.send_data(slave_socket,job_to_do)
                     # Waits for the job to be done
@@ -193,6 +169,7 @@ class MasterNode:
                     self.save_job("Done",job_done)
                     # Sends the ok command
                     self.send_data(slave_socket,"Ok")
+                    self.delete_job(job_done)
                     # Waits for the confirmation from the slave
                     conf_msg = self.recieve_data(slave_socket)
                     if conf_msg == "Ok":

@@ -1,11 +1,13 @@
 import socket
 import pickle
-from slave_files.task_modules.image_task_module import ImageTaskModule
-from configuration.configuration import Configuration
-from utils.job import Job
+from task_modules.image_task_module import ImageTaskModule
+from configuration import Configuration
+from job import Job
 import io
 import time
 import os
+from typing import Any
+import cv2
 
 # TODO: CHECK THE PATH BEFORE EXPORTING TO DOCKER
 # -----------------------------------------------
@@ -42,7 +44,7 @@ class Slave():
         """
         n_try = 0
         success = False
-        while n_try < max_connection_tries:
+        while n_try < max_connection_tries and not success:
             try:
                 # Attemps to connect to the master node
                 self._slave_socket.connect((self._master_ip,self._master_port))
@@ -56,7 +58,7 @@ class Slave():
         else:
             print(f"Slave could not connect to Master node. Please check if the master node is active and it's direction is the one indicated {self._master_ip}:{self._master_port}.")
         return success
-
+       
     def start(self) -> None:
         """ Stablish a socket connection with the master node and starts to communicate. """
         # Tries to connect to the master node
@@ -76,7 +78,6 @@ class Slave():
                 print(len(images))
                 task.load_images(images)
                 # Process the data
-               
                 payload_processed = task.do_task()
                 # Loads the payload on the object to return
                 job_to_process.payload = payload_processed
