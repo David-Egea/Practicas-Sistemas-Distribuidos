@@ -14,10 +14,7 @@ ___
 *Esta es la propuesta desarrollada como Práctica Final de la asignatura de Sistemas Distribuidos.*  
 El proyecto consiste en la implementación de un servicio de cálculo distribuido, donde un cliente puede enviar una serie tareas que son procesadas por los diferentes nodos que conforman la red de computación. 
 
-![La imagen no se encuentra disponible :(](abstract.svg "Concepto de servicio")
-
-La guía para escribir en [Markdown](https://www.markdownguide.org/basic-syntax/).
-
+![La imagen no se encuentra disponible :(](concept.svg "Concepto de servicio")
 ___
 ## 2. Arquitectura del sistema
 
@@ -25,7 +22,11 @@ La arquitectura empleada en esta ocasión sigue la estructura esclavo-maestro, d
 
 ___
 ## 2.1. Esquema de funcionamiento
+A continuación se muestra un ejemplo del funcionamiento del sistema de cálculo distribuido, para la siguiente situación:
 
+*Un cliente desea enviar dos tareas distintas al DCN (Distributed Computing Network), cada una está includida en las requests correspondientes A y B.*
+
+![La imagen no se encuentra disponible :(](diagram-es.svg "Concepto de servicio")
 ___
 ## 3. Guía práctica.
 
@@ -114,4 +115,3 @@ Actualmente, esta primera versión de sistema cuenta con algunas limitaciones ob
 - Las direcciones de los nodos se encuentran fijadas en los archivos de configuración, por lo que la asignación de la IP de red y el puerto no se realiza de forma automática. 
 - La funcionalidad soportada por los nodos es limitada, y depende fundamentalmente de los módulos de procesamiento incorporados. Esto obliga a desarrollar esto como una clase . La idea es perfilar esta característica para adaptarla a una arquitectura orientada a microservicios. Desacoplando de esta forma el nodo cliente de la implementación del procesamiento. 
 - La red contendores docker es de tipo *host* y funciona perfectamente en el caso de que todos los nodos se encuentran dentro de la misma máquina. No obstante, para una implementación orientada a una arquitectura distribuida, sería más conveniente apostar por su despligue en redes de tipo *overlay*. 
--
