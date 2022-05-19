@@ -1,8 +1,0 @@
-docker build -t servidor .
-sudo docker run -it -d --network host --name servidor servidor
-
-docker build -t esclavo .
-sudo docker run -it -d --network host --name esclavo esclavo
-
-docker build -t cliente .
-sudo docker run -it -d --network host --name cliente cliente 
