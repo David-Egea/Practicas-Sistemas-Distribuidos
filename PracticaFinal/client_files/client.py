@@ -89,8 +89,16 @@ class Client:
         time.sleep(1)
         for element in listed_directory:
             if i< self.elements_load:
+                correct = False
+                while not correct:
+                    try:
+                        with open(os.path.join(self.directoryToDo,element)) as file:
+                            file.close()
+                        correct = True
+                    except:
+                        pass
                 try:
-                    image= cv2.imread(self.directoryToDo+"/"+element)
+                    image= cv2.imread(os.path.join(self.directoryToDo,element))
                 except:
                     break
                 i=i+1
