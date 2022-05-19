@@ -1,3 +1,8 @@
-docker build -t prueba .
-sudo docker save -o prueba.tar prueba
-sudo docker run -it -d --network host --name clienteprueba clienteprueba 
+docker build -t servidor .
+sudo docker run -it -d --network host --name servidor servidor
+
+docker build -t esclavo .
+sudo docker run -it -d --network host --name esclavo esclavo
+
+docker build -t cliente .
+sudo docker run -it -d --network host --name cliente cliente 
