@@ -181,12 +181,14 @@ def add_block():
         transactions = request.get_json()["transactions"]
         timestamp = request.get_json()["timestamp"]
         previous_hash = request.get_json()["previous_hash"]
+        nonce = request.get_json()["nonce"]
         current_hash = request.get_json()["current_hash"]
     except KeyError: 
         return ("Invalid data", 400)
     else:
         # Constructs a block
         block = Block(index,transactions,timestamp,previous_hash)
+        block.nonce = nonce
         # Tries to append the block to the blockchain
         global blockchain
         added = blockchain.append_block(block,current_hash)
