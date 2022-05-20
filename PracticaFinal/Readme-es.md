@@ -8,23 +8,27 @@ ___
 
 1. Introducción
 2. Arquitectura del sistema.
-3. Caso de uso
+3. Guía práctica
+4. Futuras mejoras
 ___
 ## 1. Introducción
 *Esta es la propuesta desarrollada como Práctica Final de la asignatura de Sistemas Distribuidos.*  
 El proyecto consiste en la implementación de un servicio de cálculo distribuido, donde un cliente puede enviar una serie tareas que son procesadas por los diferentes nodos que conforman la red de computación. 
 
 ![La imagen no se encuentra disponible :(](concept.svg "Concepto de servicio")
+
+La idea principal es distribuir cada uno de los nodos que conforman mediante contenedores Docker, de forma que constituya una forma fácil y sencilla de desplegar este tipo de redes. 
+De este modo podemos levantar un clúster empleando software poco complejo y sin preocupaciones sobre actualizaciones futuras, al no haber prácticamente instalación alguna y simplemente basta con repetir el mismo proceso con la nueva versión del contendor distribuido. 
+
 ___
 ## 2. Arquitectura del sistema
 
-La arquitectura empleada en esta ocasión sigue la estructura esclavo-maestro, donde los nodos de procesamiento constituyen los esclavos y hay un único servidor que ejerce de *master* para los *slaves*. Es el nodo maestro quien se encarga de dividir y fragemntar las tareas, enviando los múltiples fragmentos a los distintos nodos de la red atendiendo a la capacidades de procesamiento de cada nodo. 
+La arquitectura empleada en esta ocasión sigue la estructura esclavo-maestro, donde los nodos de procesamiento constituyen los esclavos y hay un único servidor que ejerce de *master* para los *slaves*. Es el nodo maestro quien se encarga de dividir y fragmentar las tareas, enviando los múltiples fragmentos a los distintos nodos de la red atendiendo a la capacidad de procesamiento de cada nodo. 
 
-___
-## 2.1. Esquema de funcionamiento
+### 2.1. Esquema de funcionamiento
 A continuación se muestra un ejemplo del funcionamiento del sistema de cálculo distribuido, para la siguiente situación:
 
-*Un cliente desea enviar dos tareas distintas al DCN (Distributed Computing Network), cada una está includida en las requests correspondientes A y B.*
+*Un cliente desea enviar dos tareas distintas al DCN (Distributed Computing Network), cada una está incluida en las requests correspondientes A y B.*
 
 ![La imagen no se encuentra disponible :(](diagram-es.svg "Concepto de servicio")
 ___
@@ -46,7 +50,7 @@ Para desplegar un nodo de procesamiento o ***slave node*** es necesario cumplir 
 - Contar con [Docker](https://www.docker.com/) instalado en el dispositivo.
 
 ### 3.1 Preparación de los nodos
-*`[Atención]: El order de activación es crítico. No levantar los nodos siguiendo las intrucciones incluidas a continuación puede provocar el fallo del sistema.`*
+*`[Atención]: El orden de activación es crítico. No levantar los nodos siguiendo las instrucciones incluidas a continuación puede provocar el fallo del sistema.`*
 
 Primeramente, se deberá levantar el nodo servidor. El *server node* debe ser **siempre** el primer elemento en activarse. De lo contrario, la conexión con el resto de nodos de la red no será posible. Para generar una imagen *Docker* del *server*, se deberá ir al directorio **.../PracticaFinal/server_files**, donde se deberá localizar el fichero *Dockerfile*.
 
@@ -84,7 +88,7 @@ Para comprobar si efectivamente todos los nodos se han levantado correctamente, 
 
 ### 3.2 Enviar archivos usando FTP
 
-FTP es un protocolo de transferencia que permite enviar archivos entre dispositivos conectados a una misma red TCP. En el caso de esta práctica, se ha empleando la aplicación [WinSCP](https://winscp.net/eng/index.php?) para enviar imágenes desde el pc del cliente al nodo del mismo que se encuentra en el contenedor. Estas imágenes serán enviadas al *server nodo* y posteriormente procesadas según lo indicado en el **Apartado 3**. 
+FTP es un protocolo de transferencia que permite enviar archivos entre dispositivos conectados a una misma red TCP. En el caso de esta práctica, se ha hecho uso de la aplicación [WinSCP](https://winscp.net/eng/index.php?) para enviar imágenes desde el pc del cliente al nodo del mismo que se encuentra en el contenedor. Estas imágenes serán enviadas al *server nodo* y posteriormente procesadas según lo indicado en el **Apartado 3**. 
 
 ![La imagen no se encuentra disponible :(](winscp_show.png "[WinSCP] Ejemplo de uso.")
 
@@ -96,7 +100,7 @@ De esta forma, el cliente es capaz de enviar y recibir las imágenes a través d
 
 En primer lugar el protocolo deberá establecerse en **FTP**, no se debe incluir cifrado, la dirección del servidor se ajustará a **192.168.1.7**, el puerto que se utilizará es el *2121*. Por otro lado, las credenciales de acceso son, **usuario** y la contraseña, **usuario**. A continuación se deberá pulsar el botón de **conectar**.
 
-Una vez realizado este proceso, se le mostrarán una interfaz con dos *boxes* principales. La *box* de la izquierda muestra el contenido de la carpeta local, y se deberá acceder al directorio del cual descuelgen las imágenes que se deseen procesar. La *box* de la derecha por el contrario, deberá mostrar la carpeta *filesToDo*, que es el buzón de entrada. Para procesar las imágenes, se deberán arrastar de la primera *box* a la segunda. 
+Una vez realizado este proceso, se le mostrarán una interfaz con dos *boxes* principales. La *box* de la izquierda muestra el contenido de la carpeta local, y se deberá acceder al directorio del cual descuelguen las imágenes que se deseen procesar. La *box* de la derecha por el contrario, deberá mostrar la carpeta *filesToDo*, que es el buzón de entrada. Para procesar las imágenes, se deberán arrastrar de la primera *box* a la segunda. 
 
 ### 3.3 Ejemplo de uso
 
@@ -104,7 +108,7 @@ Por último, se muestra un ejemplo de uso de esta red de cálculo. En este caso 
 
 A continuación se muestra un ejemplo realizado utilizando este sistema desarrollado:
 
-Imagen Original           |  Imagen Procesada
+Imagen Original           | Imagen Procesada
 :-------------------------:|:-------------------------:
 ![La imagen no se encuentra disponible :(](example.jpg "[WinSCP] Imagen original.")  |  ![La imagen no se encuentra disponible :(](example_processed.jpg "[WinSCP] Imagen procesada.")
 ---
