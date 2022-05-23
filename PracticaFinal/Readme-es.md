@@ -56,7 +56,7 @@ Primeramente, se deberá levantar el nodo servidor. El *server node* debe ser **
 
 A continuación se deberá de abrir un terminal y ejecutar el siguiente comando:
 ```
-docker build -t server.
+docker build -t server .
 ````
 
 Tras haber generado la imagen deseada, se deberá poner a correr un contenedor:
@@ -98,7 +98,7 @@ De esta forma, el cliente es capaz de enviar y recibir las imágenes a través d
 
 ![La imagen no se encuentra disponible :(](winscp_log.png "[WinSCP] Iniciar sesión.")
 
-En primer lugar el protocolo deberá establecerse en **FTP**, no se debe incluir cifrado, la dirección del servidor se ajustará a **192.168.1.7**, el puerto que se utilizará es el *2121*. Por otro lado, las credenciales de acceso son, **usuario** y la contraseña, **usuario**. A continuación se deberá pulsar el botón de **conectar**.
+En primer lugar el protocolo deberá establecerse en **FTP**, no se debe incluir cifrado, la dirección del servidor se ajustará a **192.168.1.7**, el puerto que se utilizará es el *2121*. Por otro lado, las credenciales de acceso son, **usuario** y la contraseña, **password**. A continuación se deberá pulsar el botón de **conectar**.
 
 Una vez realizado este proceso, se le mostrarán una interfaz con dos *boxes* principales. La *box* de la izquierda muestra el contenido de la carpeta local, y se deberá acceder al directorio del cual descuelguen las imágenes que se deseen procesar. La *box* de la derecha por el contrario, deberá mostrar la carpeta *filesToDo*, que es el buzón de entrada. Para procesar las imágenes, se deberán arrastrar de la primera *box* a la segunda. 
 
